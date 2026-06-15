@@ -27,3 +27,18 @@ CARD_HEIGHT = 150
 MAX_PLAYERS = 4
 MIN_PLAYERS = 2
 INFRASTRUCTURE_VICTORY_COUNT = 9
+INITIAL_HAND_SIZE = 4
+ACTIONS_PER_TURN = 2
+EVENT_FREQUENCY = 2  # Toutes les 2 manches
+
+# Types d'actions
+ACTION_DRAW_INFRA = "draw_infra"
+ACTION_DRAW_BONUS = "draw_bonus"
+ACTION_PLAY_CARD = "play_card"
+
+# Directions pour le placement
+TOP = "top"
+BOTTOM = "bottom"
+LEFT = "left"
+RIGHT = "right"
+DIRECTIONS = [TOP, BOTTOM, LEFT, RIGHT]

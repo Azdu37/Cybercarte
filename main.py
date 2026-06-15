@@ -2,15 +2,19 @@ import sys
 from src.controllers.game_controller import GameController
 
 def main():
-    # Dans une version finale, le nombre de joueurs serait demandé via un menu Pygame
-    # Pour l'instant, on simule 2 joueurs pour tester l'architecture
-    player_count = 2
+    print("=== Network Codex ===")
     
-    if len(sys.argv) > 1:
+    # En mode local sur le même ordi, on demande le nombre de joueurs au début
+    player_count = 0
+    while player_count < 2 or player_count > 4:
         try:
-            player_count = int(sys.argv[1])
-        except ValueError:
-            pass
+            val = input("Entrez le nombre de joueurs (2-4) : ")
+            player_count = int(val)
+        except (ValueError, EOFError):
+            # En cas d'erreur ou si l'input n'est pas possible, on met 2 par défaut
+            player_count = 2
+            print(f"Utilisation par défaut : {player_count} joueurs.")
+            break
 
     controller = GameController()
     controller.start_new_game(player_count)
