@@ -4,19 +4,27 @@ class CardType(Enum):
     INFRASTRUCTURE = auto()
     BONUS_MALUS = auto()
     EVENT = auto()
-    MACHINE = auto()
-    PROTECTION = auto()
+
+class CardCategory(Enum):
+    MACHINE = auto()     # Permet de construire le réseau
+    PROTECTION = auto()  # Protège contre les attaques
+    ATTACK = auto()      # Attaque les autres joueurs
+    UTILITY = auto()     # Autres effets (bonus de pioche, etc.)
 
 class Connection(Enum):
     NONE = 0
-    TYPE_A = 1
-    TYPE_B = 2
-    # À définir selon le design final des connecteurs
+    LINK = 1  # Connecteur standard
+    # On peut ajouter d'autres types si nécessaire
 
 class Card:
-    def __init__(self, name, card_type, connections=None):
+    def __init__(self, card_id, name, card_type, category, connections=None, effect_id=None, description=""):
+        self.id = card_id
         self.name = name
         self.card_type = card_type
+        self.category = category
+        self.description = description
+        self.effect_id = effect_id
+        
         # connections: dict { 'top': Connection, 'right': Connection, 'bottom': Connection, 'left': Connection }
         self.connections = connections or {
             'top': Connection.NONE,
@@ -24,12 +32,19 @@ class Card:
             'bottom': Connection.NONE,
             'left': Connection.NONE
         }
+        
         self.is_connected = True
+        self.is_flipped = False # Pour les cartes déconnectées
         self.attached_protection = None
+
+    def attach_protection(self, protection_card):
+        self.attached_protection = protection_card
 
     def disconnect(self):
         self.is_connected = False
+        self.is_flipped = True
         self.attached_protection = None
 
     def __repr__(self):
-        return f"Card({self.name}, {self.card_type.name}, connected={self.is_connected})"
+        status = "Connected" if self.is_connected else "Disconnected"
+        return f"Card({self.name}, {self.category.name}, {status})"
