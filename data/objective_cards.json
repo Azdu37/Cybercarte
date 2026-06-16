@@ -1,0 +1,46 @@
+[
+  {
+    "id": "objectif_routeurs",
+    "type": "objectif",
+    "nom": "Sécuriser deux routeurs",
+    "categorie": "objectif",
+    "connecteurs": {},
+    "description": "Placez deux cartes de type routeur actives sur votre réseau.",
+    "tags": ["objectif"],
+    "protege_de": [],
+    "effets": {"type": "objectif", "goal": "tag", "tag": "routeur", "count": "2"}
+  },
+  {
+    "id": "objectif_protection",
+    "type": "objectif",
+    "nom": "Déployer une protection",
+    "categorie": "objectif",
+    "connecteurs": {},
+    "description": "Ayez au moins une carte de protection active dans votre réseau.",
+    "tags": ["objectif"],
+    "protege_de": [],
+    "effets": {"type": "objectif", "goal": "has_protection", "count": "1"}
+  },
+  {
+    "id": "objectif_reseau_6",
+    "type": "objectif",
+    "nom": "Réseau robuste",
+    "categorie": "objectif",
+    "connecteurs": {},
+    "description": "Maintenez au moins 6 cartes actives sur votre réseau.",
+    "tags": ["objectif"],
+    "protege_de": [],
+    "effets": {"type": "objectif", "goal": "count_active", "count": "6"}
+  },
+  {
+    "id": "objectif_base_donnees",
+    "type": "objectif",
+    "nom": "Sécuriser une base de données",
+    "categorie": "objectif",
+    "connecteurs": {},
+    "description": "Placez au moins une carte de type base_de_donnee active.",
+    "tags": ["objectif"],
+    "protege_de": [],
+    "effets": {"type": "objectif", "goal": "tag", "tag": "base_de_donnee", "count": "1"}
+  }
+]

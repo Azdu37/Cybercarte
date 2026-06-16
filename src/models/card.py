@@ -14,6 +14,7 @@ class Card:
     description: str = ""
     tags: tuple[str, ...] = field(default_factory=tuple)
     protege_de: tuple[str, ...] = field(default_factory=tuple)
+    effets: dict[str, str] = field(default_factory=dict)
 
     def connecteur(self, direction: Direction) -> Connecteur:
         return self.connecteurs.get(direction, Connecteur.VIDE)
@@ -46,6 +47,7 @@ def card_from_dict(data: dict) -> Card:
         description=data.get("description", ""),
         tags=tuple(data.get("tags", [])),
         protege_de=tuple(data.get("protege_de", [])),
+        effets={k: str(v) for k, v in data.get("effets", {}).items()},
     )
 
 

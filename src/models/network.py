@@ -19,6 +19,16 @@ class Cellule:
     carte: Card
     etat: EtatCellule = EtatCellule.VIVANTE
     protection: Optional[Card] = None
+    dessous: Optional[Card] = None
+    dessous_etat: Optional[EtatCellule] = None
+
+    @property
+    def top_carte(self) -> Card:
+        return self.carte
+
+    @property
+    def top_etat(self) -> EtatCellule:
+        return self.etat
 
 
 class Network:
@@ -90,6 +100,15 @@ class Network:
     def poser_carte(self, carte: Card, pos: Position) -> None:
         if not self.peut_poser(carte, pos):
             raise ValueError(f"Placement invalide : {carte.nom} en {pos}")
+        cel = self.grille.get(pos)
+        if cel is not None and cel.etat == EtatCellule.MORTE:
+            if cel.dessous is not None:
+                raise ValueError(f"Impossible de superposer plus d'une carte en {pos}")
+            cel.dessous = cel.carte
+            cel.dessous_etat = cel.etat
+            cel.carte = carte
+            cel.etat = EtatCellule.VIVANTE
+            return
         self.grille[pos] = Cellule(carte=carte, etat=EtatCellule.VIVANTE)
 
     def placer_force(self, carte: Card, pos: Position) -> None:

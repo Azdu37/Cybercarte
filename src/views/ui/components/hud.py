@@ -7,7 +7,7 @@ from src.views.ui.components.card_render import (
     C_INFRA, C_BONUS, C_EVENT, draw_rounded_rect
 )
 
-HUD_H = 44
+HUD_H = 60
 
 
 def draw(surf: pygame.Surface, game: Game, screen_w: int) -> None:
@@ -15,26 +15,31 @@ def draw(surf: pygame.Surface, game: Game, screen_w: int) -> None:
     pygame.draw.line(surf, C_BORDER, (0, HUD_H), (screen_w, HUD_H), 1)
 
     hf = pygame.font.SysFont(None, 22)
-    sf = pygame.font.SysFont(None, 18)
+    sf = pygame.font.SysFont(None, 16)
     cp = game.current_player
 
-    # Tour
-    surf.blit(hf.render(f"Tour {game.round_count}", True, C_TEXT), (14, 14))
+    # Ligne 1 : Tour + Joueur
+    surf.blit(hf.render(f"Tour {game.round_count}", True, C_TEXT), (14, 8))
+    surf.blit(hf.render(f"► {cp.name}", True, C_HIGHLIGHT), (110, 8))
 
-    # Joueur courant
-    surf.blit(hf.render(f"► {cp.name}", True, C_HIGHLIGHT), (110, 14))
+    # Ligne 2 : Objectif
+    objectif_txt = cp.objectif.nom if cp.objectif else "Aucun objectif"
+    objectif_statut = "✓" if cp.personal_objective_accomplished else "…"
+    surf.blit(sf.render(f"Objectif : {objectif_txt} {objectif_statut}", True, C_TEXT_DIM), (110, 32))
 
-    # Cercles d'actions (reprend l'idée des camarades)
+    if game.last_event:
+        surf.blit(sf.render(f"Événement actif : {game.last_event}", True, C_TEXT_DIM), (110, 48))
+
+    # Cercles d'actions
     for i in range(2):
         color = C_HIGHLIGHT if i < cp.actions_left else C_BORDER
-        pygame.draw.circle(surf, color, (340 + i * 22, HUD_H // 2), 7)
-    surf.blit(sf.render("actions", True, C_TEXT_DIM), (372, 16))
+        pygame.draw.circle(surf, color, (340 + i * 22, 15), 7)
+    surf.blit(sf.render("actions", True, C_TEXT_DIM), (372, 8))
 
     # Indicateurs couleurs tous les joueurs
-    
     for i, p in enumerate(game.players):
         mx = 460 + i * 36
-        my = HUD_H // 2
+        my = 15
         pygame.draw.circle(surf, p.color, (mx, my), 7)
         if i == game.current_player_index:
             pygame.draw.circle(surf, C_HIGHLIGHT, (mx, my), 7, 2)
@@ -49,13 +54,13 @@ def draw(surf: pygame.Surface, game: Game, screen_w: int) -> None:
     ]
     dx = screen_w - 340
     for name, count, color in labels:
-        pygame.draw.rect(surf, color, (dx, 8, 90, 26), border_radius=5)
-        pygame.draw.rect(surf, (0, 0, 0), (dx, 8, 90, 26), width=1, border_radius=5)
+        pygame.draw.rect(surf, color, (dx, 6, 90, 26), border_radius=5)
+        pygame.draw.rect(surf, (0, 0, 0), (dx, 6, 90, 26), width=1, border_radius=5)
         t = sf.render(f"{name} {count}", True, (10, 10, 20))
-        surf.blit(t, (dx + 5, 15))
+        surf.blit(t, (dx + 5, 12))
         dx += 98
 
     # Message dernier événement
     if game.last_message:
         msg = sf.render(game.last_message, True, C_HIGHLIGHT)
-        surf.blit(msg, msg.get_rect(midright=(screen_w - 350, HUD_H // 2)))
+        surf.blit(msg, msg.get_rect(midright=(screen_w - 350, 35)))

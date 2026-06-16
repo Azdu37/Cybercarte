@@ -41,12 +41,15 @@ class GameController:
                 self.game_model = Game()
                 self.game_model.setup(self.nb_joueurs)
                 self.game_screen = game.GameScreen(SCREEN_WIDTH, SCREEN_HEIGHT)
-                self.game_screen.log.add(f"► Tour de {self.game_model.current_player.name}")
                 self.state = "game"
+                self.game_screen.log.add(f"► Tour de {self.game_model.current_player.name}")
+                for player in self.game_model.players:
+                    if player.objectif:
+                        self.game_screen.log.add(f"Objectif {player.name} : {player.objectif.nom}")
 
         elif self.state == "game" and self.game_model and self.game_screen:
-            victoire = self.game_screen.handle_click(pos, self.game_model)
-            if victoire:
+            partie_terminee = self.game_screen.handle_click(pos, self.game_model)
+            if partie_terminee:
                 for p in self.game_model.players:
                     p.calculate_score()
                 self.winner = max(self.game_model.players, key=lambda p: p.score)
@@ -58,6 +61,7 @@ class GameController:
                 self.state = "menu"
                 self.game_model = None
                 self.game_screen = None
+                self.winner = None
             elif action == "quitter":
                 pygame.quit()
                 sys.exit()

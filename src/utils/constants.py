@@ -38,7 +38,7 @@ PLAYER_COLORS = [
 # Dimensions écran et cartes
 # ---------------------------------------------------------------------------
 SCREEN_WIDTH  = 1200
-SCREEN_HEIGHT = 750
+SCREEN_HEIGHT = 800
 CARD_WIDTH    = 100
 CARD_HEIGHT   = 150
 

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "bonus_reparer_1",
+    "type": "patch",
+    "nom": "Correctif rapide",
+    "categorie": "bonus",
+    "connecteurs": {},
+    "description": "Répare une carte bloquée sur votre réseau.",
+    "tags": ["reparation"],
+    "protege_de": [],
+    "effets": {"type": "reparer", "count": "1"}
+  },
+  {
+    "id": "bonus_reparer_2",
+    "type": "hotfix",
+    "nom": "Hotfix opérateur",
+    "categorie": "bonus",
+    "connecteurs": {},
+    "description": "Redémarre une carte bloquée et restaure le flux.",
+    "tags": ["reparation"],
+    "protege_de": [],
+    "effets": {"type": "reparer", "count": "1"}
+  },
+  {
+    "id": "malus_phishing",
+    "type": "malus",
+    "nom": "Phishing",
+    "categorie": "malus",
+    "connecteurs": {},
+    "description": "Une attaque perturbe une carte adversaire.",
+    "tags": ["attaque"],
+    "protege_de": [],
+    "effets": {"type": "deconnecter", "target": "random_opponent", "count": "1"}
+  },
+  {
+    "id": "malus_ransomware",
+    "type": "malus",
+    "nom": "Ransomware",
+    "categorie": "malus",
+    "connecteurs": {},
+    "description": "Blocage massif : deux cartes adverses sont impactées.",
+    "tags": ["attaque"],
+    "protege_de": [],
+    "effets": {"type": "deconnecter", "target": "random_opponent", "count": "2"}
+  },
+  {
+    "id": "malus_trojan",
+    "type": "malus",
+    "nom": "Cheval de Troie",
+    "categorie": "malus",
+    "connecteurs": {},
+    "description": "Une carte adverse est bloquée par une intrusion furtive.",
+    "tags": ["attaque"],
+    "protege_de": [],
+    "effets": {"type": "deconnecter", "target": "random_opponent", "count": "1"}
+  }
+]

@@ -8,9 +8,9 @@ from src.views.ui.components.card_render import (
     CARD_W, CARD_H
 )
 
-BAR_PAD  = 8
-CARD_GAP = 8
-BAR_H    = CARD_H + 32
+BAR_PAD  = 4
+CARD_GAP = 6
+BAR_H    = 120
 
 
 def draw(surf: pygame.Surface, hand: list[Card], screen_w: int, screen_h: int,
@@ -22,8 +22,8 @@ def draw(surf: pygame.Surface, hand: list[Card], screen_w: int, screen_h: int,
     pygame.draw.rect(surf, C_PANEL, (0, bar_y - 4, screen_w, BAR_H + 12))
     pygame.draw.line(surf, C_BORDER, (0, bar_y - 4), (screen_w, bar_y - 4), 1)
 
-    lf = pygame.font.SysFont(None, 18)
-    surf.blit(lf.render("MAIN", True, C_TEXT_DIM), (12, bar_y + 6))
+    lf = pygame.font.SysFont(None, 16)
+    surf.blit(lf.render("MAIN", True, C_TEXT_DIM), (12, bar_y + 4))
 
     rects: list[tuple[int, pygame.Rect]] = []
     n = len(hand)
@@ -35,15 +35,15 @@ def draw(surf: pygame.Surface, hand: list[Card], screen_w: int, screen_h: int,
 
     for i, card in enumerate(hand):
         cx = start_x + i * (CARD_W + CARD_GAP)
-        cy = bar_y + 6
+        cy = bar_y + 4
         r = draw_card(surf, card, cx, cy, selected=(i == selected))
         rects.append((i, r))
 
     # Instruction si une carte est sélectionnée
     if selected is not None and 0 <= selected < len(hand):
-        tf = pygame.font.SysFont(None, 18)
+        tf = pygame.font.SysFont(None, 14)
         t = tf.render("Cliquez sur une case verte pour poser la carte", True, C_HIGHLIGHT)
-        surf.blit(t, t.get_rect(center=(screen_w // 2, bar_y - 14)))
+        surf.blit(t, t.get_rect(center=(screen_w // 2, bar_y - 10)))
 
     return rects
 
