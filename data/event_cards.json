@@ -1,0 +1,35 @@
+[
+  {
+    "id": "event_panne_electrique",
+    "type": "evenement",
+    "nom": "Panne électrique",
+    "categorie": "evenement",
+    "connecteurs": {},
+    "description": "Tous les joueurs perdent temporairement une carte active.",
+    "tags": ["evenement"],
+    "protege_de": [],
+    "effets": {"type": "deconnecter", "target": "self", "count": "1"}
+  },
+  {
+    "id": "event_fuite_donnees",
+    "type": "evenement",
+    "nom": "Fuite de données",
+    "categorie": "evenement",
+    "connecteurs": {},
+    "description": "L’infrastructure s’effrite, chaque joueur perd une carte.",
+    "tags": ["evenement"],
+    "protege_de": [],
+    "effets": {"type": "deconnecter", "target": "self", "count": "1"}
+  },
+  {
+    "id": "event_maintenance",
+    "type": "evenement",
+    "nom": "Maintenance critique",
+    "categorie": "evenement",
+    "connecteurs": {},
+    "description": "Le réseau est perturbé, une carte par joueur est coupée.",
+    "tags": ["evenement"],
+    "protege_de": [],
+    "effets": {"type": "deconnecter", "target": "self", "count": "1"}
+  }
+]

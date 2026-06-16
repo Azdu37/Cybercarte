@@ -5,7 +5,24 @@ from src.views.ui.components.card_render import (
     C_PANEL, C_BORDER, C_HIGHLIGHT, C_TEXT_DIM, draw_rounded_rect
 )
 
-MAX_LINES = 14
+MAX_LINES = 16
+
+
+def wrap_text(text: str, font, max_w: int) -> list[str]:
+    words = text.split()
+    lines: list[str] = []
+    cur = ""
+    for w in words:
+        test = (cur + " " + w).strip()
+        if font.size(test)[0] <= max_w:
+            cur = test
+        else:
+            if cur:
+                lines.append(cur)
+            cur = w
+    if cur:
+        lines.append(cur)
+    return lines
 
 
 class Log:
@@ -22,7 +39,12 @@ class Log:
         hf = pygame.font.SysFont(None, 18)
         surf.blit(hf.render("Journal", True, C_TEXT_DIM), (x + 8, y + 6))
         visible = self.messages[-MAX_LINES:]
-        for i, msg in enumerate(visible):
+        line_y = y + 24
+        for msg in visible:
             color = C_HIGHLIGHT if msg.startswith("►") else C_TEXT_DIM
-            t = tf.render(msg[:42], True, color)
-            surf.blit(t, (x + 8, y + 24 + i * 14))
+            for line in wrap_text(msg, tf, w - 18):
+                t = tf.render(line, True, color)
+                surf.blit(t, (x + 8, line_y))
+                line_y += 14
+                if line_y > y + h - 16:
+                    return

@@ -88,25 +88,22 @@ class GameScreen:
         top = hud.HUD_H + 10
         bottom = hand_bar.bar_top(self.sh) - 10
 
-        # ── Zone centrale : log + boutons ────────────────────────────
-        cx = self.sw - 230
-        # On sépare le log (haut) et les boutons (bas)
+        # ── Zone droite : log + boutons (plus grande) ────────────────
+        log_w = 280
+        log_x = self.sw - log_w - 10
         log_h = 240
-        draw_rounded_rect(surf, C_PANEL, (cx, top, 220, log_h), radius=8,
+        draw_rounded_rect(surf, C_PANEL, (log_x, top, log_w, log_h), radius=8,
                           border=1, border_color=C_BORDER)
-        self.log.draw(surf, cx, top, 220, log_h)
+        self.log.draw(surf, log_x, top, log_w, log_h)
 
-        # Mise à jour de la position des boutons pour qu'ils soient sous le log
+        # Boutons sous le log
         btn_start_y = top + log_h + 10
-        self._btn_fin.x = cx + 10
-        self._btn_infra.x = cx + 10
-        self._btn_bonus.x = cx + 10
-        self._btn_fin.w = 200
-        self._btn_infra.w = 200
-        self._btn_bonus.w = 200
-        self._btn_fin.y = btn_start_y
-        self._btn_infra.y = btn_start_y + 44
-        self._btn_bonus.y = btn_start_y + 88
+        btn_w = log_w - 20
+        btn_h = 32
+        
+        self._btn_fin = pygame.Rect(log_x + 10, btn_start_y, btn_w, btn_h)
+        self._btn_infra = pygame.Rect(log_x + 10, btn_start_y + btn_h + 6, btn_w, btn_h)
+        self._btn_bonus = pygame.Rect(log_x + 10, btn_start_y + (btn_h + 6) * 2, btn_w, btn_h)
 
         hover_fin   = self._btn_fin.collidepoint(mx, my)
         hover_infra = self._btn_infra.collidepoint(mx, my)
@@ -115,30 +112,31 @@ class GameScreen:
         _draw_button(surf, "Piocher Infra", self._btn_infra, hover_infra)
         _draw_button(surf, "Piocher Bonus", self._btn_bonus, hover_bonus)
 
-        # Réseaux adversaires (gauche, en petit) ───────────────────
+        # ── Zone gauche : réseaux adversaires (en petit) ─────────────
         others = [p for p in game.players if p is not cp]
         opp_x = 10
-        opp_w = CARD_W * 2 // 3   # cartes réduites
+        opp_w = (log_x - 20)
+        max_opp_h = bottom - top
         
-        # Limite droite pour les réseaux (ne pas empiéter sur le log/boutons)
-        max_net_x = cx - 20
-        for opp in others:
-            # cadre
+        for i, opp in enumerate(others):
             nw, nh = network_pixel_size(opp.network, card_w=60)
-            draw_rounded_rect(surf, C_PANEL, (opp_x - 4, top - 4, nw + 16, nh + 32),
-                              radius=8, border=1, border_color=C_BORDER)
-            f = pygame.font.SysFont(None, 16)
-            nb = opp.nombre_cartes_actives()
-            t = f.render(f"{opp.name}  {nb}/9", True, C_TEXT_DIM)
-            surf.blit(t, (opp_x, top))
-            draw_network(surf, opp.network, opp_x, top + 18, card_w=60, card_h=84,
-                         current=False, label="")
-            opp_x += nw + 20
+            if i > 0 and opp_x + nw > log_x - 10:
+                break
+            if nw > 0 and nh > 0:
+                draw_rounded_rect(surf, C_PANEL, (opp_x - 4, top - 4, min(nw + 16, opp_w), nh + 32),
+                                  radius=8, border=1, border_color=C_BORDER)
+                f = pygame.font.SysFont(None, 14)
+                nb = opp.nombre_cartes_actives()
+                t = f.render(f"{opp.name} {nb}/9", True, C_TEXT_DIM)
+                surf.blit(t, (opp_x, top))
+                draw_network(surf, opp.network, opp_x, top + 18, card_w=60, card_h=84,
+                             current=False, label="")
+                opp_x += min(nw + 20, opp_w)
 
-        # ── Réseau du joueur courant (centre-droite) ─────────────────
+        # ── Réseau du joueur courant (centre) ───────────────────────
         net_w, net_h = network_pixel_size(cp.network, self._surlignees)
-        avail_w = cx - 10 - opp_x - 10
-        net_ox = opp_x + 10 + max(0, (avail_w - net_w) // 2)
+        net_ox = 10 + (log_x - 20) // 2 - net_w // 2
+        net_ox = max(10, min(net_ox, log_x - 20 - net_w))
         avail_h = bottom - top
         net_oy = top + max(0, (avail_h - net_h) // 2)
 
@@ -152,7 +150,7 @@ class GameScreen:
             current=True,
             positions_surlignees=self._surlignees,
             selected_pos=self.selected_pos,
-            label=f"{cp.name}  —  {cp.nombre_cartes_actives()}/9",
+            label=f"{cp.name} {cp.nombre_cartes_actives()}/9",
         )
 
         # hover tooltip réseau actif

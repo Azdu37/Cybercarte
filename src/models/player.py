@@ -46,6 +46,31 @@ class Player:
         self.hand.pop(card_index)
         return True
 
+    def active_positions(self, tag: str | None = None) -> list[Position]:
+        return [
+            pos for pos, cel in self.network.grille.items()
+            if cel.etat.value == "vivante" and (tag is None or tag in cel.carte.tags)
+        ]
+
+    def update_objective_status(self) -> None:
+        if self.objectif is None:
+            self.personal_objective_accomplished = False
+            return
+        effets = self.objectif.effets
+        goal = effets.get("goal")
+        count = int(effets.get("count", "1"))
+        tag = effets.get("tag")
+
+        if goal == "tag":
+            matching = sum(1 for c in self.network.cartes_actives() if tag and tag in c.tags)
+            self.personal_objective_accomplished = matching >= count
+        elif goal == "count_active":
+            self.personal_objective_accomplished = self.nombre_cartes_actives() >= count
+        elif goal == "has_protection":
+            self.personal_objective_accomplished = self.has_protection()
+        else:
+            self.personal_objective_accomplished = False
+
     def has_protection(self) -> bool:
         """Vérifie si une carte de protection active est présente (repris de Cybercarte)."""
         for cel in self.network.grille.values():
@@ -60,6 +85,7 @@ class Player:
         return self.network.nombre_cartes_actives()
 
     def calculate_score(self) -> int:
+        self.update_objective_status()
         base = self.nombre_cartes_actives()
         bonus = 5 if self.personal_objective_accomplished else 0
         self.score = base + bonus

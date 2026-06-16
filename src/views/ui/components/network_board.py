@@ -65,6 +65,12 @@ def draw_network(
     for pos, cel in network.grille.items():
         x = ox + (pos[0] - x_min) * pas
         y = oy + (pos[1] - y_min) * pas
+        if cel.dessous is not None:
+            offset = 12 if current else 8
+            draw_card(surf, cel.dessous, x + offset, y + offset,
+                      selected=False,
+                      morte=(cel.dessous_etat is EtatCellule.MORTE),
+                      small=not current)
         r = draw_card(surf, cel.carte, x, y,
                       selected=(pos == selected_pos),
                       morte=(cel.etat is EtatCellule.MORTE),
