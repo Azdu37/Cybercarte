@@ -1,56 +1,55 @@
-from enum import Enum, auto
+"""Représentation d'une carte du jeu."""
+from __future__ import annotations
+import json
+from dataclasses import dataclass, field
+from .enums import Connecteur, Direction, CategorieCarte
 
-class CardType(Enum):
-    INFRASTRUCTURE = auto()
-    BONUS_MALUS = auto()
-    EVENT = auto()
 
-class CardCategory(Enum):
-    MACHINE = auto()     # Permet de construire le réseau
-    PROTECTION = auto()  # Protège contre les attaques
-    ATTACK = auto()      # Attaque les autres joueurs
-    UTILITY = auto()     # Autres effets (bonus de pioche, etc.)
-
-class Connection(Enum):
-    NONE = 0
-    LINK = 1  # Connecteur standard
-    # On peut ajouter d'autres types si nécessaire
-
+@dataclass(frozen=True)
 class Card:
-    def __init__(self, card_id, name, card_type, category, connections=None, effect_id=None, description=""):
-        self.id = card_id
-        self.name = name
-        self.card_type = card_type
-        self.category = category
-        self.description = description
-        self.effect_id = effect_id
-        
-        # connections: dict { 'top': Connection, 'right': Connection, 'bottom': Connection, 'left': Connection }
-        self.connections = connections or {
-            'top': Connection.NONE,
-            'right': Connection.NONE,
-            'bottom': Connection.NONE,
-            'left': Connection.NONE
-        }
-        
-        self.is_connected = True
-        self.is_flipped = False # Pour les cartes déconnectées
-        self.attached_protection = None
-        self.attacked = False # Si la carte a été attaquée ce tour
+    id: str
+    nom: str
+    categorie: CategorieCarte
+    connecteurs: dict[Direction, Connecteur] = field(default_factory=dict)
+    description: str = ""
+    tags: tuple[str, ...] = field(default_factory=tuple)
+    protege_de: tuple[str, ...] = field(default_factory=tuple)
 
-    def attach_protection(self, protection_card):
-        self.attached_protection = protection_card
+    def connecteur(self, direction: Direction) -> Connecteur:
+        return self.connecteurs.get(direction, Connecteur.VIDE)
 
-    def disconnect(self):
-        self.is_connected = False
-        self.is_flipped = True
-        self.attached_protection = None
-        self.attacked = False
+    def est_placable(self) -> bool:
+        return self.categorie in (CategorieCarte.INFRASTRUCTURE, CategorieCarte.PROTECTION)
 
-    def repair(self):
-        self.is_connected = True
-        self.is_flipped = False
+    def __str__(self) -> str:
+        return self.nom
 
-    def __repr__(self):
-        status = "Connected" if self.is_connected else "Disconnected"
-        return f"Card({self.name}, {self.category.name}, {status})"
+    # Alias anglais pour compat avec le code Cybercarte
+    @property
+    def name(self) -> str:
+        return self.nom
+
+    @property
+    def card_type(self) -> str:
+        return self.categorie.value
+
+
+def card_from_dict(data: dict) -> Card:
+    connecteurs = {
+        Direction(d): Connecteur(v) for d, v in data.get("connecteurs", {}).items()
+    }
+    return Card(
+        id=data["id"],
+        nom=data["nom"],
+        categorie=CategorieCarte(data["categorie"]),
+        connecteurs=connecteurs,
+        description=data.get("description", ""),
+        tags=tuple(data.get("tags", [])),
+        protege_de=tuple(data.get("protege_de", [])),
+    )
+
+
+def load_cards(chemin: str) -> dict[str, Card]:
+    with open(chemin, encoding="utf-8") as f:
+        data = json.load(f)
+    return {d["id"]: card_from_dict(d) for d in data}

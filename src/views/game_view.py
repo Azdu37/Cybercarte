@@ -1,175 +1,140 @@
+"""
+Vue de partie : plateau du joueur courant + main + en-tête avec
+indicateurs de couleur des joueurs (repris de Cybercarte).
+"""
+from __future__ import annotations
 import pygame
-from src.utils.constants import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK
+from src.models.game import Game
+from src.utils import constants as c
+from src.utils.widgets import dessiner_bouton
+from src.views.board_renderer import (
+    draw_network, dessiner_carte, pixel_to_grid, limites_combinees
+)
 
-# Couleurs inspirées de la maquette
-C_BG          = (18,  22,  35)
-C_PANEL       = (28,  33,  50)
-C_PANEL_LIGHT = (38,  45,  65)
-C_BORDER      = (60,  70, 100)
-C_HIGHLIGHT   = (255, 215,   0)
-C_TEXT        = (230, 230, 240)
-C_TEXT_DIM    = (130, 135, 155)
-C_INFRA       = (195, 210, 220)
-C_PROTECTION  = ( 80, 195, 215)
-C_BONUS       = ( 90, 185, 100)
-C_ATTACK      = (195,  70,  70)
-C_EVENT       = (160, 110, 210)
-C_DISCONNECT  = ( 90,  90, 100)
+Position = tuple[int, int]
 
-CARD_W, CARD_H   = 90, 126
-SLOT_PAD         = 10
-GRID_COLS        = 3
 
-class GameView:
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Network Codex")
-        self.font_main = pygame.font.SysFont("Arial", 24)
-        self.font_title = pygame.font.SysFont("Arial", 13, bold=True)
-        self.font_card_name = pygame.font.SysFont("Arial", 10, bold=True)
-        self.font_card_eff = pygame.font.SysFont("Arial", 8)
-        self.font_slot = pygame.font.SysFont("Arial", 9)
-        self.message = ""
-        self.message_timer = 0
+def _positions_surlignees(game: Game, carte_sel: int | None) -> tuple[Position, ...]:
+    if carte_sel is None:
+        return ()
+    joueur = game.current_player
+    if not (0 <= carte_sel < len(joueur.hand)):
+        return ()
+    return tuple(joueur.valid_positions(joueur.hand[carte_sel]))
 
-    def set_message(self, text):
-        self.message = text
-        self.message_timer = 120 # 2 secondes à 60fps
 
-    def draw_game(self, game, selected_card_index=None):
-        self.screen.fill(C_BG)
-        
-        # 1. Dessiner les grilles des joueurs
-        for i, player in enumerate(game.players):
-            is_current = (i == game.current_player_index)
-            ox = 20 + i * (GRID_COLS * (CARD_W + SLOT_PAD) + SLOT_PAD + 40)
-            oy = 40
-            self.draw_network_grid(player, ox, oy, is_current)
+def calculer_disposition(game: Game, carte_sel: int | None) -> dict:
+    joueur = game.current_player
+    surlignees = _positions_surlignees(game, carte_sel)
 
-        # 2. Dessiner le HUD (Manche, Actions restantes)
-        self.draw_hud(game)
+    x_min, y_min, x_max, y_max = limites_combinees(joueur.network, surlignees)
+    pas = c.TAILLE_CASE_PLATEAU + c.ESPACE_CASE
+    larg_plateau = (x_max - x_min + 1) * pas - c.ESPACE_CASE
+    haut_plateau = (y_max - y_min + 1) * pas - c.ESPACE_CASE
 
-        # 3. Dessiner la main du joueur actuel
-        current_player = game.get_current_player()
-        self.draw_hand_bar(current_player, selected_card_index)
+    zone_h = c.SCREEN_HEIGHT - c.HAUTEUR_ENTETE - c.HAUTEUR_ZONE_MAIN
+    origine = (
+        (c.SCREEN_WIDTH - larg_plateau) // 2,
+        c.HAUTEUR_ENTETE + (zone_h - haut_plateau) // 2,
+    )
 
-        # 4. Dessiner le message d'info
-        if self.message_timer > 0:
-            txt = self.font_main.render(self.message, True, C_HIGHLIGHT)
-            self.screen.blit(txt, (SCREEN_WIDTH//2 - txt.get_width()//2, SCREEN_HEIGHT - 200))
-            self.message_timer -= 1
+    # Cartes en main
+    lc, hc = c.TAILLE_CARTE_MAIN
+    n = len(joueur.hand)
+    largeur_totale = n * lc + max(0, n - 1) * c.ESPACE_MAIN
+    x0 = (c.SCREEN_WIDTH - largeur_totale) // 2
+    y_main = c.SCREEN_HEIGHT - c.HAUTEUR_ZONE_MAIN + (c.HAUTEUR_ZONE_MAIN - hc) // 2
+    rects_main = [
+        pygame.Rect(x0 + i * (lc + c.ESPACE_MAIN), y_main, lc, hc)
+        for i in range(n)
+    ]
 
-        pygame.display.flip()
+    bouton_fin = pygame.Rect(c.SCREEN_WIDTH - 180 - c.MARGE, (c.HAUTEUR_ENTETE - 40) // 2, 180, 40)
 
-    def draw_rounded_rect(self, surf, color, rect, radius=8, border=0, border_color=None):
-        rect = pygame.Rect(rect)
-        pygame.draw.rect(surf, color, rect, border_radius=radius)
-        if border > 0 and border_color:
-            pygame.draw.rect(surf, border_color, rect, width=border, border_radius=radius)
+    return {
+        "surlignees": surlignees,
+        "x_min": x_min, "y_min": y_min, "pas": pas,
+        "origine": origine,
+        "rects_main": rects_main,
+        "bouton_fin": bouton_fin,
+    }
 
-    def get_card_color(self, card):
-        if card.is_flipped:
-            return C_DISCONNECT
-        cat = card.category.name
-        if cat == "MACHINE": return C_INFRA
-        if cat == "PROTECTION": return C_PROTECTION
-        if cat == "ATTACK": return C_ATTACK
-        if cat == "UTILITY": return C_BONUS
-        return C_INFRA
 
-    def draw_card(self, surf, card, x, y, selected=False, alpha=255):
-        bg = self.get_card_color(card)
-        card_surf = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
-        
-        # Fond
-        pygame.draw.rect(card_surf, (*bg, alpha), (0, 0, CARD_W, CARD_H), border_radius=8)
+def draw(surface: pygame.Surface, game: Game, carte_sel: int | None, polices: dict, disp: dict) -> None:
+    joueur = game.current_player
 
-        # Bande couleur
-        stripe_color = {
-            "MACHINE":    ( 80, 100, 130),
-            "PROTECTION": ( 20, 130, 160),
-            "ATTACK":     (140,  30,  30),
-            "UTILITY":    ( 40, 130,  60),
-        }.get(card.category.name, (80, 80, 80))
-        pygame.draw.rect(card_surf, (*stripe_color, alpha), (0, 0, CARD_W, 6), border_radius=8)
-        pygame.draw.rect(card_surf, (0, 0, 0, 0), (0, 3, CARD_W, 3))
+    # --- En-tête -------------------------------------------------------
+    # Point coloré + nom du joueur courant
+    pygame.draw.circle(surface, joueur.color, (c.MARGE + 8, c.HAUTEUR_ENTETE // 2), 8)
+    titre = polices["normale"].render(f"Tour de {joueur.name}", True, c.COULEUR_TITRE)
+    surface.blit(titre, (c.MARGE + 24, (c.HAUTEUR_ENTETE - titre.get_height()) // 2))
 
-        # Bordure
-        if selected:
-            pygame.draw.rect(card_surf, C_HIGHLIGHT, (0, 0, CARD_W, CARD_H), width=2, border_radius=8)
-        else:
-            pygame.draw.rect(card_surf, (0, 0, 0, 100), (0, 0, CARD_W, CARD_H), width=1, border_radius=8)
+    # Actions restantes
+    actions_txt = f"Actions : {joueur.actions_left}/{c.ACTIONS_PER_TURN}"
+    at = polices["petite"].render(actions_txt, True, c.COULEUR_TITRE)
+    surface.blit(at, at.get_rect(midleft=(c.SCREEN_WIDTH // 2 - 120, c.HAUTEUR_ENTETE // 2)))
 
-        # Nom
-        tc = (255, 255, 255) if card.category.name in ["ATTACK", "PROTECTION"] else (20, 20, 30)
-        name_txt = self.font_card_name.render(card.name, True, tc)
-        card_surf.blit(name_txt, (5, 10))
+    # Cartes actives
+    info = f"Réseau : {joueur.nombre_cartes_actives()}/9"
+    it = polices["petite"].render(info, True, c.COULEUR_TITRE)
+    surface.blit(it, it.get_rect(midleft=(c.SCREEN_WIDTH // 2 + 30, c.HAUTEUR_ENTETE // 2)))
 
-        # Déconnecté ?
-        if card.is_flipped:
-            lbl = self.font_slot.render("HORS LIGNE", True, (255, 100, 100))
-            card_surf.blit(lbl, (CARD_W//2 - lbl.get_width()//2, CARD_H//2))
+    # Indicateurs couleurs de tous les joueurs (en haut à gauche, en ligne)
+    for i, p in enumerate(game.players):
+        marker_x = c.MARGE + 200 + i * 34
+        marker_y = c.HAUTEUR_ENTETE // 2
+        pygame.draw.circle(surface, p.color, (marker_x, marker_y), 7)
+        if i == game.current_player_index:
+            pygame.draw.circle(surface, c.COULEUR_TITRE, (marker_x, marker_y), 7, 2)
+        lbl = polices["minuscule"].render(str(p.nombre_cartes_actives()), True, c.COULEUR_TITRE)
+        surface.blit(lbl, lbl.get_rect(center=(marker_x, marker_y + 14)))
 
-        surf.blit(card_surf, (x, y))
-        return pygame.Rect(x, y, CARD_W, CARD_H)
+    souris = pygame.mouse.get_pos()
+    dessiner_bouton(surface, disp["bouton_fin"], "Fin de tour", polices["petite"],
+                    survol=disp["bouton_fin"].collidepoint(souris))
 
-    def draw_network_grid(self, player, ox, oy, is_current):
-        grid_w = GRID_COLS * (CARD_W + SLOT_PAD) + SLOT_PAD
-        grid_h = 3 * (CARD_H + SLOT_PAD) + SLOT_PAD + 24
-        panel_color = C_PANEL_LIGHT if is_current else C_PANEL
-        border_color = C_HIGHLIGHT if is_current else C_BORDER
-        
-        self.draw_rounded_rect(self.screen, panel_color, (ox, oy, grid_w, grid_h), radius=10, border=2, border_color=border_color)
-        
-        name_txt = self.font_title.render(f"{player.name} - Score: {player.score}", True, C_HIGHLIGHT if is_current else C_TEXT)
-        self.screen.blit(name_txt, (ox + 10, oy + 6))
+    # Message du dernier événement / action
+    if game.last_message:
+        msg = polices["petite"].render(game.last_message, True, c.COULEUR_ELECTRIQUE)
+        surface.blit(msg, msg.get_rect(midbottom=(c.SCREEN_WIDTH // 2, c.HAUTEUR_ENTETE - 4)))
 
-        # La grille est 3x3. On mappe les positions (x,y)
-        for row in range(3):
-            for col in range(3):
-                cx = ox + SLOT_PAD + col * (CARD_W + SLOT_PAD)
-                cy = oy + 24 + SLOT_PAD + row * (CARD_H + SLOT_PAD)
-                
-                card = player.grid.get((col, row))
-                if card:
-                    self.draw_card(self.screen, card, cx, cy)
-                else:
-                    slot_r = pygame.Rect(cx, cy, CARD_W, CARD_H)
-                    self.draw_rounded_rect(self.screen, C_BG, slot_r, radius=8, border=1, border_color=C_BORDER)
-                    n = self.font_slot.render(f"{col},{row}", True, C_BORDER)
-                    self.screen.blit(n, (cx + CARD_W//2 - n.get_width()//2, cy + CARD_H//2 - n.get_height()//2))
+    # --- Plateau -------------------------------------------------------
+    draw_network(surface, joueur.network, disp["origine"], c.TAILLE_CASE_PLATEAU,
+                 polices["petite"], polices["minuscule"],
+                 positions_surlignees=disp["surlignees"])
 
-    def draw_hand_bar(self, player, selected_card_index):
-        bar_h = CARD_H + 30
-        bar_y = SCREEN_HEIGHT - bar_h - 10
-        pygame.draw.rect(self.screen, C_PANEL, (0, bar_y, SCREEN_WIDTH, bar_h))
-        pygame.draw.line(self.screen, C_BORDER, (0, bar_y), (SCREEN_WIDTH, bar_y), 1)
-        
-        txt = self.font_title.render("MAIN", True, C_TEXT_DIM)
-        self.screen.blit(txt, (10, bar_y + 4))
-        
-        for i, card in enumerate(player.hand):
-            cx = 20 + i * (CARD_W + 15)
-            cy = bar_y + 20
-            is_selected = (i == selected_card_index)
-            self.draw_card(self.screen, card, cx, cy, selected=is_selected)
+    # --- Zone de main --------------------------------------------------
+    zone = pygame.Rect(0, c.SCREEN_HEIGHT - c.HAUTEUR_ZONE_MAIN, c.SCREEN_WIDTH, c.HAUTEUR_ZONE_MAIN)
+    pygame.draw.rect(surface, c.COULEUR_ZONE_MAIN, zone)
 
-    def draw_hud(self, game):
-        hud_y = 10
-        round_txt = self.font_title.render(f"MANCHE {game.round_count}", True, C_TEXT)
-        self.screen.blit(round_txt, (SCREEN_WIDTH // 2 - 250, hud_y))
-        
-        cp = game.get_current_player()
-        act_txt = self.font_title.render(f"ACTIONS: {cp.actions_left}", True, C_HIGHLIGHT)
-        self.screen.blit(act_txt, (SCREEN_WIDTH // 2 - 100, hud_y))
+    if not joueur.hand:
+        t = polices["petite"].render("Main vide", True, c.COULEUR_TITRE)
+        surface.blit(t, t.get_rect(center=zone.center))
 
-        if cp.objective:
-            obj_txt = self.font_title.render(f"OBJECTIF: {cp.objective['name']} ({cp.objective['desc']})", True, C_BONUS)
-            self.screen.blit(obj_txt, (SCREEN_WIDTH // 2 + 50, hud_y))
-            if cp.personal_objective_accomplished:
-                check_txt = self.font_title.render("✓ ACCOMPLI", True, C_BONUS)
-                self.screen.blit(check_txt, (SCREEN_WIDTH // 2 + 400, hud_y))
+    for i, (carte, rect) in enumerate(zip(joueur.hand, disp["rects_main"])):
+        dessiner_carte(surface, rect, carte, polices["petite"], selectionne=(i == carte_sel))
 
-    def show_menu(self):
-        pass
+    # Séparateur
+    pygame.draw.line(surface, c.COULEUR_GRILLE, (0, c.SCREEN_HEIGHT - c.HAUTEUR_ZONE_MAIN),
+                     (c.SCREEN_WIDTH, c.SCREEN_HEIGHT - c.HAUTEUR_ZONE_MAIN), 2)
+
+
+def handle_click(game: Game, carte_sel: int | None, pixel: tuple[int, int], disp: dict) -> int | None:
+    joueur = game.current_player
+
+    if disp["bouton_fin"].collidepoint(pixel):
+        game.next_turn()
+        return None
+
+    for i, rect in enumerate(disp["rects_main"]):
+        if rect.collidepoint(pixel):
+            return None if i == carte_sel else i
+
+    pos = pixel_to_grid(pixel, disp["origine"], disp["x_min"], disp["y_min"],
+                        disp["pas"], c.TAILLE_CASE_PLATEAU)
+    if pos is not None and carte_sel is not None and 0 <= carte_sel < len(joueur.hand):
+        if pos in disp["surlignees"]:
+            success, _ = game.perform_action("play_card", card_index=carte_sel, pos=pos)
+            return None
+
+    return None
