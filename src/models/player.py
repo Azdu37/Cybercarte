@@ -7,6 +7,7 @@ class Player:
         self.color = color
         self.hand = []
         self.grid = {}  # {(x, y): Card}
+        self.objective = None
         self.personal_objective_accomplished = False
         self.score = 0
         self.actions_left = ACTIONS_PER_TURN
@@ -20,6 +21,10 @@ class Player:
             if not self.grid[(x, y)].is_flipped:
                 return False
         
+        # Limite de la grille 3x3
+        if x < 0 or x >= 3 or y < 0 or y >= 3:
+            return False
+
         if not self.grid:
             return True # Première carte
             
@@ -52,15 +57,26 @@ class Player:
         if 0 <= card_index < len(self.hand):
             card = self.hand[card_index]
             
-            # Si c'est une carte de protection, on peut soit la poser normalement,
-            # soit l'attacher à une machine existante.
-            # Ici on implémente le placement sur la grille.
+            # Cas spécial : réparation d'une carte déconnectée
+            if (x, y) in self.grid and self.grid[(x, y)].is_flipped:
+                # On ne peut réparer qu'avec une carte du même type ou si c'est autorisé
+                # Pour simplifier, on remplace la carte
+                if self.can_place_card(card, x, y):
+                    self.grid[(x, y)] = card
+                    self.hand.pop(card_index)
+                    return True
+                return False
+
             if self.can_place_card(card, x, y):
-                # Si on place sur une carte déconnectée, elle est détruite
                 self.grid[(x, y)] = card
                 self.hand.pop(card_index)
                 return True
         return False
+
+    def remove_card(self, x, y):
+        if (x, y) in self.grid:
+            return self.grid.pop((x, y))
+        return None
 
     def attach_protection_to_card(self, card_index, x, y):
         if 0 <= card_index < len(self.hand):
@@ -68,18 +84,53 @@ class Player:
             if card.category.name == "PROTECTION" and (x, y) in self.grid:
                 target_card = self.grid[(x, y)]
                 if not target_card.is_flipped:
-                    target_card.attach_protection(card)
-                    self.hand.pop(card_index)
-                    return True
+                    if target_card.attached_protection is None:
+                        target_card.attach_protection(card)
+                        self.hand.pop(card_index)
+                        return True
         return False
 
     def calculate_score(self):
+        # Vérification de l'objectif
+        self.check_objective_accomplished()
+        
         # Chaque carte connectée compte pour 1 point
-        # On considère comme connectées les cartes non retournées
         base_score = sum(1 for card in self.grid.values() if not card.is_flipped)
         bonus = 5 if self.personal_objective_accomplished else 0
         self.score = base_score + bonus
         return self.score
+
+    def check_objective_accomplished(self):
+        if not self.objective:
+            return
+            
+        obj_id = self.objective["id"]
+        if obj_id == "SHIELD_WALL":
+            protections = sum(1 for card in self.grid.values() if not card.is_flipped and card.category.name == "PROTECTION")
+            # Aussi compter les protections attachées
+            attached = sum(1 for card in self.grid.values() if not card.is_flipped and card.attached_protection)
+            if protections + attached >= 3:
+                self.personal_objective_accomplished = True
+        
+        elif obj_id == "VERTICAL_LINK":
+            for x in range(3):
+                if all((x, y) in self.grid and not self.grid[(x, y)].is_flipped for y in range(3)):
+                    self.personal_objective_accomplished = True
+                    break
+        
+        elif obj_id == "HORIZONTAL_LINK":
+            for y in range(3):
+                if all((x, y) in self.grid and not self.grid[(x, y)].is_flipped for x in range(3)):
+                    self.personal_objective_accomplished = True
+                    break
+                    
+        elif obj_id == "DIVERSITY":
+            machines = set()
+            for card in self.grid.values():
+                if not card.is_flipped and card.category.name == "MACHINE":
+                    machines.add(card.name) # Utilise le nom pour la diversité
+            if len(machines) >= 3:
+                self.personal_objective_accomplished = True
 
     def has_protection(self):
         # Vérifie si une carte de protection est présente et active dans le réseau

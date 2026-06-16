@@ -36,6 +36,7 @@ class Card:
         self.is_connected = True
         self.is_flipped = False # Pour les cartes déconnectées
         self.attached_protection = None
+        self.attacked = False # Si la carte a été attaquée ce tour
 
     def attach_protection(self, protection_card):
         self.attached_protection = protection_card
@@ -44,6 +45,11 @@ class Card:
         self.is_connected = False
         self.is_flipped = True
         self.attached_protection = None
+        self.attacked = False
+
+    def repair(self):
+        self.is_connected = True
+        self.is_flipped = False
 
     def __repr__(self):
         status = "Connected" if self.is_connected else "Disconnected"
