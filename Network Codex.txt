@@ -1,0 +1,145 @@
+﻿Network Codex
+A partir de 11 ans 2-4 joueurs 15 minutes
+But du jeu :
+Construire une infratrucure sécurisée de 9 cartes. (à modifier)
+Apprendre ludiquement des notions de cybersécurité
+
+
+Préparation du jeu :
+1.Placez les 2 pioches (Cartes infrastructure, cartes bonus/malus)
+2.Distribuez 4 cartes de la pile infrastructure à chaque joueur
+3. Il y a 2 pioches :
+* Une avec les cartes infrastructures et bonus malus
+* Une avec les cartes
+4. L'objectif est attribué en début de partie.
+
+
+
+
+Déroulement d’une manche:
+Chaque joueur joue tour à tour.
+Chaque joueur commence son tour en piochant une carte et possède deux actions par tour : 
+Les actions possibles : 
+* Il peut piocher dans la pioche infrastructure,
+*  la pioche bonus/malus, piocher
+*  jouer une carte de sa main
+Une carte ne peut être posée que si ses connecteurs correspondent à ceux de la carte adjacente.
+La structure de l'infrastructure de cartes d'un joueur peut etre tentaculaire tant que ses connections lui permette. 
+Une manche se finit quand tout les joueurs ont joués.
+Une fois la manche terminée, une carte évènement est tirée qui affecte tous les
+joueurs. (ps : une manche sur deux).
+
+
+
+
+Placement : 
+
+
+On peut placer les cartes seulement en verticale. pour poser deux cartes l’une à coté de l’autre, il faut que les connexions soit présentes et identiques, on peut poser une carte à gauche, à droite, en haut ou en bas d’une autre carte 
+
+
+On peut mettre une carte sur une carte déconnecté, cela détruit la carte désactivée 
+
+
+Déconnexion : quand une carte est déconnecté, on la retourne pour montrer ça, elle ne compte plus dans le nombre de carte totale .Et c’est possible d’y mettre une autre carte (qui sera un peu décalée dans le visuel )  avec les bonnes connexions nécessaires .
+si une protection y étais attaché, elle n’es plus active 
+
+
+
+
+Les types de Pioche :
+
+
+Pile infrastructures: Les cartes qui construisent votre infrastructure. Vous pouvez y piocherdes cartes qui peuvent vous aider ou retarder la progression des autre
+joueurs, des cartes protections ainsi queque des cartes machine qui permettes de construire le réseau.
+
+
+Pile bonus/malus : Ces cartes sont à effet immédiat (c’est à dire qu’elle ne sont jamais prises en main). Appliquez l’effet indiqué sur la carte.
+
+
+Pile évènements
+Toutes les 2 manches, tirer une de ces cartes et appliquez son effet.
+
+
+
+
+Fin de partie :
+Le premier joueur à assembler une infrastructure de 9 cartes termine la
+partie. Chaque carte de l’infrastructure compte pour un point, et l’objectif
+personnel en rajoute 5 s’il a été accompli.
+
+
+
+
+
+
+
+
+
+
+
+
+Architecture et déroulement logiciel  du jeu 
+le jeu est en local, tout le monde joue sur le même ordina
+à l’allumage, il demande le nombre de joueur et attribue à chacun une couleur avec un numéro 
+
+
+
+
+Logique de protection à coder
+Quand une carte d'attaque (rouge) est jouée contre un joueur, avant d'appliquer l'effet il faut vérifier si une carte de protection dans son réseau la bloque :
+
+
+Notes et changements: 
+
+
+Rework des cartes evenements : en ajouter, les ajuster et en retirer
+Appliquer un évenement toutes les 2 ou 3 manches : commencer avec un evenement tous les 2 manches, et ajuster à la fin en fonction du dynamisme du jeu.
+Rework la condition de victoire
+Ajouter un système d’attaque entre différents joueurs (plus de vols, de destructions de cartes d’autrui…).
+
+
+
+
+
+
+
+
+
+
+Notes de bases : 
+idée : jeu basique certaines fonctionnalités de base  jouables au début (seul contraintes les prises  et une 3 eme type de prise )) 
+proposition de changement (que ca reste fun) pour plus de réalisme 
+correspondance entre les evolution du canva et le jeu réel 
+des trucs plus réalistes , changer les cartes, ajouter des connexions si possibles 
+
+
+un plateau avec des connexions de fils déja implémentés pour continuer le jeu 
+superposition de deux cartes ( rendre le plateau assez modulables  plus de carreaux )
+augmenter des types de briques prises  ( bornes wifi , carte wifi , routeur ,arduino  , catégoriser aux max et diversifier aussi nos choix et options  )
+—- avoir des employés ( à definir ) adminin sgbd , 
+proposition de jeux amélioré  (faudra réécrire les régles  ,agencés ) rendre le jeu plus interactif , ludique .
+test avec les camarades pour avoir une p’tite idée de la complexité du jeu 
+
+
+Notes structurées 
+📌 Phase 1 : Le Jeu de Base (MVP - Produit Minimum Viable)
+L'objectif est d'avoir une version simple et jouable rapidement pour poser les fondations.
+* Mécanique de base : Un jeu basique avec seulement quelques fonctionnalités initiales.
+* Contraintes de départ : Se focaliser uniquement sur la gestion des prises (avec un focus sur un 3ème type de prise spécifique à définir).
+* Objectif immédiat : Faire des tests avec les camarades pour évaluer la complexité globale, le rythme et voir si la base est solide.
+📌 Phase 2 : Évolution vers le Réalisme & Matériel (Hardware)
+Ajouter de la profondeur technique tout en gardant le jeu fun.
+* Diversification des composants : Augmenter et catégoriser au maximum les types de briques/prises pour enrichir les options.
+   * Exemples à intégrer : Bornes Wi-Fi, cartes Wi-Fi, routeurs, cartes Arduino, etc.
+* Refonte des cartes : Modifier le deck de cartes actuel pour coller à ces nouveaux éléments.
+* Alignement pédagogique : Assurer une correspondance stricte entre l'évolution du Canva (modèle théorique) et les actions du jeu réel.
+📌 Phase 3 : Modularité & Mécaniques du Plateau
+Améliorer le support physique ou visuel du jeu pour le rendre plus interactif.
+* Plateau évolutif : Créer un plateau plus grand (plus de carreaux) et hautement modifiable.
+* Système de câblage : Intégrer un système de superposition de deux cartes pour simuler des connexions de fils déjà implémentées, permettant de continuer et de fluidifier le jeu.
+* Connexions : Ajouter un maximum de possibilités de connexions physiques ou logiques entre les éléments.
+📌 Phase 4 : Gestion des Ressources Humaines
+Introduire une dimension "stratégie/gestion" au-delà du simple matériel.
+* Recrutement d'employés : Possibilité d'avoir du personnel spécialisé pour débloquer des actions ou bonus.
+   * Rôles à définir : Administrateur Système (SysAdmin), Administrateur de Base de Données (Administrateur SGBD), etc.
