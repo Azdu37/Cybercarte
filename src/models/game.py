@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from .card import Card, load_cards
 from .player import Player
+from .enums import CategorieCarte
 from src.utils.constants import (
     PLAYER_COLORS, ACTIONS_PER_TURN, EVENT_FREQUENCY,
     INFRASTRUCTURE_VICTORY_COUNT, INITIAL_HAND_SIZE,
@@ -35,21 +36,62 @@ class Game:
 
     def setup(self, player_count: int) -> None:
         all_cards = load_cards(CHEMIN_CARTES)
-        deck = list(all_cards.values())
-        random.shuffle(deck)
+        
+        # Séparation des cartes par catégorie
+        infra_pool = []
+        bonus_pool = []
+        event_pool = []
+        
+        for card in all_cards.values():
+            if card.categorie == CategorieCarte.INFRASTRUCTURE:
+                infra_pool.append(card)
+            elif card.categorie == CategorieCarte.PROTECTION:
+                # Les protections vont dans la pioche infrastructure pour être piochées normalement
+                infra_pool.append(card)
+            elif card.categorie == CategorieCarte.BONUS or card.categorie == CategorieCarte.MALUS:
+                bonus_pool.append(card)
+            elif card.categorie == CategorieCarte.EVENEMENT:
+                event_pool.append(card)
+        
+        # Si la pioche bonus est vide, on crée quelques cartes par défaut (pour dépanner)
+        if not bonus_pool:
+            from .enums import Direction, Connecteur
+            for i in range(10):
+                bonus_pool.append(Card(
+                    id=f"bonus_def_{i}",
+                    nom=f"Bonus Rapide {i}",
+                    categorie=CategorieCarte.BONUS,
+                    description="Effet temporaire (en cours d'implémentation)"
+                ))
+        
+        # Si la pioche événement est vide, on en crée aussi
+        if not event_pool:
+            for i in range(5):
+                event_pool.append(Card(
+                    id=f"event_def_{i}",
+                    nom=f"Événement {i}",
+                    categorie=CategorieCarte.EVENEMENT,
+                    description="Un événement aléatoire survient."
+                ))
+
+        random.shuffle(infra_pool)
+        random.shuffle(bonus_pool)
+        random.shuffle(event_pool)
 
         self.players = [
             Player(player_id=i, name=f"Joueur {i+1}", color=PLAYER_COLORS[i])
             for i in range(player_count)
         ]
 
-        # Distribution initiale
-        idx = 0
+        # Distribution initiale (à partir de la pioche infra)
         for player in self.players:
             for _ in range(INITIAL_HAND_SIZE):
-                player.add_to_hand(deck[idx])
-                idx += 1
-        self.infrastructure_deck = deck[idx:]
+                if infra_pool:
+                    player.add_to_hand(infra_pool.pop())
+        
+        self.infrastructure_deck = infra_pool
+        self.bonus_malus_deck = bonus_pool
+        self.event_deck = event_pool
 
         self.start_turn()
 
