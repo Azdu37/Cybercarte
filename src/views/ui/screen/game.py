@@ -60,9 +60,9 @@ class GameScreen:
 
         # Boutons (zone centrale)
         mid_x = screen_w - 200
-        self._btn_fin   = pygame.Rect(mid_x, 140, 160, 34)
-        self._btn_infra = pygame.Rect(mid_x, 184, 160, 34)
-        self._btn_bonus = pygame.Rect(mid_x, 228, 160, 34)
+        self._btn_fin   = pygame.Rect(mid_x, 300, 160, 34)
+        self._btn_infra = pygame.Rect(mid_x, 344, 160, 34)
+        self._btn_bonus = pygame.Rect(mid_x, 388, 160, 34)
 
     # ── Calcul des positions valides ─────────────────────────────────
     def _update_surlignees(self, game: Game) -> None:
@@ -89,11 +89,24 @@ class GameScreen:
         bottom = hand_bar.bar_top(self.sh) - 10
 
         # ── Zone centrale : log + boutons ────────────────────────────
-        cx = self.sw - 210
-        draw_rounded_rect(surf, C_PANEL, (cx, top, 200, 200), radius=8,
+        cx = self.sw - 230
+        # On sépare le log (haut) et les boutons (bas)
+        log_h = 240
+        draw_rounded_rect(surf, C_PANEL, (cx, top, 220, log_h), radius=8,
                           border=1, border_color=C_BORDER)
-        log_area = pygame.Rect(cx, top, 200, 140)
-        self.log.draw(surf, cx, top, 200, 140)
+        self.log.draw(surf, cx, top, 220, log_h)
+
+        # Mise à jour de la position des boutons pour qu'ils soient sous le log
+        btn_start_y = top + log_h + 10
+        self._btn_fin.x = cx + 10
+        self._btn_infra.x = cx + 10
+        self._btn_bonus.x = cx + 10
+        self._btn_fin.w = 200
+        self._btn_infra.w = 200
+        self._btn_bonus.w = 200
+        self._btn_fin.y = btn_start_y
+        self._btn_infra.y = btn_start_y + 44
+        self._btn_bonus.y = btn_start_y + 88
 
         hover_fin   = self._btn_fin.collidepoint(mx, my)
         hover_infra = self._btn_infra.collidepoint(mx, my)
@@ -102,10 +115,13 @@ class GameScreen:
         _draw_button(surf, "Piocher Infra", self._btn_infra, hover_infra)
         _draw_button(surf, "Piocher Bonus", self._btn_bonus, hover_bonus)
 
-        # ── Réseaux adversaires (gauche, en petit) ───────────────────
+        # Réseaux adversaires (gauche, en petit) ───────────────────
         others = [p for p in game.players if p is not cp]
         opp_x = 10
         opp_w = CARD_W * 2 // 3   # cartes réduites
+        
+        # Limite droite pour les réseaux (ne pas empiéter sur le log/boutons)
+        max_net_x = cx - 20
         for opp in others:
             # cadre
             nw, nh = network_pixel_size(opp.network, card_w=60)

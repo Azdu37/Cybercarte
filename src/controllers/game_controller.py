@@ -53,9 +53,14 @@ class GameController:
                 self.state = "end"
 
         elif self.state == "end":
-            self.state = "menu"
-            self.game_model = None
-            self.game_screen = None
+            action = end.handle_click(pos, SCREEN_WIDTH, SCREEN_HEIGHT)
+            if action == "rejouer":
+                self.state = "menu"
+                self.game_model = None
+                self.game_screen = None
+            elif action == "quitter":
+                pygame.quit()
+                sys.exit()
 
     def _draw(self) -> None:
         if self.state == "menu":

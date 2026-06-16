@@ -5,7 +5,7 @@ from src.views.ui.components.card_render import (
     C_PANEL, C_BORDER, C_HIGHLIGHT, C_TEXT_DIM, draw_rounded_rect
 )
 
-MAX_LINES = 10
+MAX_LINES = 14
 
 
 class Log:
