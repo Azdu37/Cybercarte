@@ -23,8 +23,11 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit(); sys.exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    pygame.quit(); sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit(); sys.exit()
+                    elif self.state == "game" and self.game_screen and self.game_screen.waiting_for_next_player:
+                        self.game_screen.waiting_for_next_player = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self._handle_click(event.pos)
                 if (event.type == pygame.MOUSEWHEEL
