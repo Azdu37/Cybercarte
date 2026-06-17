@@ -49,7 +49,6 @@ class GameScreen:
         self.selected_hand: int | None = None
         self.selected_pos: Position | None = None
         self.hover_card = None
-        self.waiting_for_next_player: bool = False
 
         # Scroll de la main
         self._hand_scroll: int = 0
@@ -69,6 +68,7 @@ class GameScreen:
         self._btn_fin   = pygame.Rect(mid_x, 140, 160, 34)
         self._btn_infra = pygame.Rect(mid_x, 184, 160, 34)
         self._btn_bonus = pygame.Rect(mid_x, 228, 160, 34)
+        self._btn_dico  = pygame.Rect(mid_x, 272, 160, 34)
 
     # ── Scroll ───────────────────────────────────────────────────────
     def _scroll_hand(self, delta: int, hand_size: int) -> None:
@@ -94,16 +94,6 @@ class GameScreen:
 
     # ── Rendu ────────────────────────────────────────────────────────
     def draw(self, surf: pygame.Surface, game: Game) -> None:
-        if self.waiting_for_next_player:
-            surf.fill((0, 0, 0))
-            f = pygame.font.SysFont(None, 48)
-            t = f.render(f"Au tour de {game.current_player.name}", True, (255, 255, 255))
-            surf.blit(t, t.get_rect(center=(self.sw // 2, self.sh // 2 - 20)))
-            f2 = pygame.font.SysFont(None, 24)
-            t2 = f2.render("Appuyez sur une touche ou cliquez pour continuer", True, (200, 200, 200))
-            surf.blit(t2, t2.get_rect(center=(self.sw // 2, self.sh // 2 + 30)))
-            return
-
         surf.fill(C_BG)
         mx, my = pygame.mouse.get_pos()
         self.hover_card = None
@@ -135,10 +125,12 @@ class GameScreen:
         self._btn_infra = pygame.Rect(log_x + 10, btn_start_y + btn_h + 6,   btn_w, btn_h)
         self._btn_bonus = pygame.Rect(log_x + 10, btn_start_y + (btn_h+6)*2, btn_w, btn_h)
 
+        self._btn_dico  = pygame.Rect(log_x + 10, btn_start_y + (btn_h+6)*3, btn_w, btn_h)
         _draw_button(surf, "Fin de tour",   self._btn_fin,   self._btn_fin.collidepoint(mx, my))
         _draw_button(surf, "Piocher Infra", self._btn_infra, self._btn_infra.collidepoint(mx, my))
         _draw_button(surf, "Piocher Bonus", self._btn_bonus, self._btn_bonus.collidepoint(mx, my))
 
+        _draw_button(surf, "📖 Dico", self._btn_dico, self._btn_dico.collidepoint(mx, my))
         # ── Zone gauche : réseaux adversaires ────────────────────────
         others = [p for p in game.players if p is not cp]
         opp_x  = 10
@@ -151,8 +143,7 @@ class GameScreen:
                                   (opp_x - 4, top - 4, nw + 16, nh + 32),
                                   radius=8, border=1, border_color=C_BORDER)
                 f = pygame.font.SysFont(None, 14)
-                txt = f"{opp.name} {opp.nombre_cartes_actives()}/9 | Main: {len(opp.hand)}"
-                surf.blit(f.render(txt, True, C_TEXT_DIM),
+                surf.blit(f.render(f"{opp.name} {opp.nombre_cartes_actives()}/9", True, C_TEXT_DIM),
                           (opp_x, top))
                 draw_network(surf, opp.network, opp_x, top + 18,
                              card_w=60, card_h=84, current=False, label="")
@@ -197,10 +188,6 @@ class GameScreen:
 
     # ── Clics ────────────────────────────────────────────────────────
     def handle_click(self, pos: tuple[int, int], game: Game) -> bool:
-        if self.waiting_for_next_player:
-            self.waiting_for_next_player = False
-            return False
-
         mx, my = pos
         cp = game.current_player
 
@@ -211,7 +198,6 @@ class GameScreen:
             self._surlignees   = ()
             self._reset_scroll_for_player(len(game.current_player.hand))
             self.log.add(f"► Tour de {game.current_player.name}")
-            self.waiting_for_next_player = True
             return False
 
         # Piocher infra
@@ -235,6 +221,10 @@ class GameScreen:
         if self._btn_right and self._btn_right.collidepoint(mx, my):
             self._scroll_hand(1, len(cp.hand))
             return False
+
+        # Dictionnaire
+        if self._btn_dico.collidepoint(mx, my):
+            return "open_dico"
 
         # Carte en main
         for i, r in self._hand_rects:
@@ -278,9 +268,6 @@ class GameScreen:
         À appeler depuis game_controller sur l'événement MOUSEWHEEL.
         dy > 0 = molette vers le haut = scroll vers la gauche.
         """
-        if self.waiting_for_next_player:
-            return
-
         bar_top_y = hand_bar.bar_top(self.sh)
         mx, my = pygame.mouse.get_pos()
         if my >= bar_top_y:   # souris dans la zone de la barre
