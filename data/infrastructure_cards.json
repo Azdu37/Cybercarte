@@ -142,7 +142,7 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "electrique",
-      "E": "electrique",
+      "E": "donnees",
       "S": "donnees",
       "O": "donnees"
     },
@@ -160,7 +160,7 @@
     "connecteurs": {
       "N": "donnees",
       "E": "electrique",
-      "S": "electrique",
+      "S": "donnees",
       "O": "donnees"
     },
     "description": "",
@@ -178,7 +178,7 @@
       "N": "donnees",
       "E": "donnees",
       "S": "electrique",
-      "O": "electrique"
+      "O": "donnees"
     },
     "description": "",
     "tags": [
@@ -192,7 +192,7 @@
     "nom": "Serveur",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "electrique",
+      "N": "donnees",
       "E": "donnees",
       "S": "donnees",
       "O": "electrique"
@@ -552,7 +552,7 @@
       "N": "donnees",
       "E": "electrique",
       "S": "electrique",
-      "O": "donnees"
+      "O": "electrique"
     },
     "description": "",
     "tags": [
@@ -566,7 +566,7 @@
     "nom": "Point Réseau",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
+      "N": "electrique",
       "E": "donnees",
       "S": "electrique",
       "O": "electrique"
@@ -584,7 +584,7 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "electrique",
-      "E": "donnees",
+      "E": "electrique",
       "S": "donnees",
       "O": "electrique"
     },
@@ -602,7 +602,7 @@
     "connecteurs": {
       "N": "electrique",
       "E": "electrique",
-      "S": "donnees",
+      "S": "electrique",
       "O": "donnees"
     },
     "description": "",
@@ -688,7 +688,7 @@
       "N": "electrique",
       "E": "donnees",
       "S": "donnees",
-      "O": "electrique"
+      "O": "donnees"
     },
     "description": "",
     "tags": [
@@ -702,7 +702,7 @@
     "nom": "Base de donnée",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "electrique",
+      "N": "donnees",
       "E": "electrique",
       "S": "donnees",
       "O": "donnees"
@@ -720,7 +720,7 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "donnees",
-      "E": "electrique",
+      "E": "donnees",
       "S": "electrique",
       "O": "donnees"
     },
@@ -738,7 +738,7 @@
     "connecteurs": {
       "N": "donnees",
       "E": "donnees",
-      "S": "electrique",
+      "S": "donnees",
       "O": "electrique"
     },
     "description": "",
@@ -773,9 +773,9 @@
     "nom": "Pare-Feu",
     "categorie": "protection",
     "connecteurs": {
-      "N": "donnees",
+      "N": "vide",
       "E": "vide",
-      "S": "vide",
+      "S": "donnees",
       "O": "donnees"
     },
     "description": "Vous protège du Cheval de Troie et des spywares",
@@ -793,10 +793,10 @@
     "nom": "Pare-Feu",
     "categorie": "protection",
     "connecteurs": {
-      "N": "donnees",
-      "E": "donnees",
-      "S": "vide",
-      "O": "vide"
+      "N": "vide",
+      "E": "vide",
+      "S": "donnees",
+      "O": "donnees"
     },
     "description": "Vous protège du Cheval de Troie et des spywares",
     "tags": [
@@ -814,9 +814,9 @@
     "categorie": "protection",
     "connecteurs": {
       "N": "vide",
-      "E": "donnees",
+      "E": "vide",
       "S": "donnees",
-      "O": "vide"
+      "O": "donnees"
     },
     "description": "Vous protège du Cheval de Troie et des spywares",
     "tags": [
@@ -853,10 +853,10 @@
     "nom": "Mise à Jour",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
-      "E": "electrique",
-      "S": "donnees",
-      "O": "electrique"
+      "N": "electrique",
+      "E": "donnees",
+      "S": "electrique",
+      "O": "vide"
     },
     "description": "Vous protège des spyware et de l'obsolescence programmée",
     "tags": [
@@ -874,9 +874,9 @@
     "categorie": "protection",
     "connecteurs": {
       "N": "electrique",
-      "E": "vide",
+      "E": "donnees",
       "S": "electrique",
-      "O": "donnees"
+      "O": "vide"
     },
     "description": "Vous protège des spyware et de l'obsolescence programmée",
     "tags": [
@@ -893,10 +893,10 @@
     "nom": "Mise à Jour",
     "categorie": "protection",
     "connecteurs": {
-      "N": "donnees",
-      "E": "electrique",
-      "S": "vide",
-      "O": "electrique"
+      "N": "electrique",
+      "E": "donnees",
+      "S": "electrique",
+      "O": "vide"
     },
     "description": "Vous protège des spyware et de l'obsolescence programmée",
     "tags": [
@@ -934,9 +934,9 @@
     "categorie": "protection",
     "connecteurs": {
       "N": "donnees",
-      "E": "donnees",
+      "E": "vide",
       "S": "vide",
-      "O": "vide"
+      "O": "donnees"
     },
     "description": "Vous protège de l'obsolescence programmée et des fichiers corrompus",
     "tags": [
@@ -953,10 +953,10 @@
     "nom": "Hygiène Numérique",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
-      "E": "donnees",
-      "S": "donnees",
-      "O": "vide"
+      "N": "donnees",
+      "E": "vide",
+      "S": "vide",
+      "O": "donnees"
     },
     "description": "Vous protège de l'obsolescence programmée et des fichiers corrompus",
     "tags": [
@@ -973,9 +973,9 @@
     "nom": "Hygiène Numérique",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
+      "N": "donnees",
       "E": "vide",
-      "S": "donnees",
+      "S": "vide",
       "O": "donnees"
     },
     "description": "Vous protège de l'obsolescence programmée et des fichiers corrompus",
@@ -1012,9 +1012,9 @@
     "nom": "VPN",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
-      "E": "electrique",
-      "S": "donnees",
+      "N": "electrique",
+      "E": "donnees",
+      "S": "vide",
       "O": "vide"
     },
     "description": "Vous protège des ransomwares",
@@ -1031,10 +1031,10 @@
     "nom": "VPN",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
-      "E": "vide",
-      "S": "electrique",
-      "O": "donnees"
+      "N": "electrique",
+      "E": "donnees",
+      "S": "vide",
+      "O": "vide"
     },
     "description": "Vous protège des ransomwares",
     "tags": [
@@ -1050,10 +1050,10 @@
     "nom": "VPN",
     "categorie": "protection",
     "connecteurs": {
-      "N": "donnees",
-      "E": "vide",
+      "N": "electrique",
+      "E": "donnees",
       "S": "vide",
-      "O": "electrique"
+      "O": "vide"
     },
     "description": "Vous protège des ransomwares",
     "tags": [
@@ -1089,10 +1089,10 @@
     "nom": "Antivirus",
     "categorie": "protection",
     "connecteurs": {
-      "N": "donnees",
-      "E": "electrique",
+      "N": "electrique",
+      "E": "vide",
       "S": "vide",
-      "O": "vide"
+      "O": "donnees"
     },
     "description": "Vous protège du Cheval de Troie et des ransomwares",
     "tags": [
@@ -1109,10 +1109,10 @@
     "nom": "Antivirus",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
-      "E": "donnees",
-      "S": "electrique",
-      "O": "vide"
+      "N": "electrique",
+      "E": "vide",
+      "S": "vide",
+      "O": "donnees"
     },
     "description": "Vous protège du Cheval de Troie et des ransomwares",
     "tags": [
@@ -1129,10 +1129,10 @@
     "nom": "Antivirus",
     "categorie": "protection",
     "connecteurs": {
-      "N": "vide",
+      "N": "electrique",
       "E": "vide",
-      "S": "donnees",
-      "O": "electrique"
+      "S": "vide",
+      "O": "donnees"
     },
     "description": "Vous protège du Cheval de Troie et des ransomwares",
     "tags": [

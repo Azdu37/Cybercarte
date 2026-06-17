@@ -1,7 +1,6 @@
 """Contrôleur principal : boucle Pygame, machine à états menu → jeu → victoire."""
 from __future__ import annotations
-import pygame
-import sys
+import pygame, sys
 from src.models.game import Game
 from src.utils.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.views.ui.screen import menu, game, end
@@ -13,10 +12,8 @@ class GameController:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Network Codex")
         self.clock = pygame.time.Clock()
-
         self.state = "menu"
         self.nb_joueurs = 2
-
         self.game_model: Game | None = None
         self.game_screen: game.GameScreen | None = None
         self.winner = None
@@ -30,11 +27,14 @@ class GameController:
                     pygame.quit(); sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self._handle_click(event.pos)
-
+                if (event.type == pygame.MOUSEWHEEL
+                        and self.state == "game"
+                        and self.game_screen and self.game_model):
+                    self.game_screen.handle_scroll(event.y, self.game_model)
             self._draw()
             self.clock.tick(60)
 
-    def _handle_click(self, pos: tuple[int, int]) -> None:
+    def _handle_click(self, pos):
         if self.state == "menu":
             self.nb_joueurs, commencer = menu.handle_click(pos, self.nb_joueurs, SCREEN_WIDTH)
             if commencer:
@@ -48,8 +48,7 @@ class GameController:
                         self.game_screen.log.add(f"Objectif {player.name} : {player.objectif.nom}")
 
         elif self.state == "game" and self.game_model and self.game_screen:
-            partie_terminee = self.game_screen.handle_click(pos, self.game_model)
-            if partie_terminee:
+            if self.game_screen.handle_click(pos, self.game_model):
                 for p in self.game_model.players:
                     p.calculate_score()
                 self.winner = max(self.game_model.players, key=lambda p: p.score)
@@ -58,15 +57,12 @@ class GameController:
         elif self.state == "end":
             action = end.handle_click(pos, SCREEN_WIDTH, SCREEN_HEIGHT)
             if action == "rejouer":
-                self.state = "menu"
-                self.game_model = None
-                self.game_screen = None
-                self.winner = None
+                self.state = "menu"; self.game_model = None
+                self.game_screen = None; self.winner = None
             elif action == "quitter":
-                pygame.quit()
-                sys.exit()
+                pygame.quit(); sys.exit()
 
-    def _draw(self) -> None:
+    def _draw(self):
         if self.state == "menu":
             menu.draw(self.screen, self.nb_joueurs, SCREEN_WIDTH, SCREEN_HEIGHT)
         elif self.state == "game" and self.game_model and self.game_screen:

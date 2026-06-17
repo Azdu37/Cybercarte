@@ -39,6 +39,10 @@ class Game:
 
     last_message: str = ""  # dernier message d'info à afficher dans la vue
     last_event: Optional[str] = None
+    
+    # V3: Gestion de la sélection manuelle des cartes
+    pending_effect: Optional[dict] = None  # {"card": Card, "player": Player, "effect_type": str, "count": int}
+    last_effect_card: Optional[Card] = None  # dernière carte d'effet appliquée
 
     def setup(self, player_count: int) -> None:
         infra_cards = load_cards(CHEMIN_CARTES_INFRA)
@@ -133,6 +137,7 @@ class Game:
         elif action_type == ACTION_DRAW_BONUS:
             if self.bonus_malus_deck:
                 card = self.bonus_malus_deck.pop()
+                self.last_effect_card = card  # Pour affichage dans l'UI
                 self.apply_immediate_effect(player, card)
                 success, msg = True, f"Carte bonus/malus : {card.nom}"
             else:
@@ -178,7 +183,33 @@ class Game:
         self._resolve_effect(player, card, source="bonus")
 
     def apply_event_effect(self, player: Player, card: Card) -> None:
-        self._resolve_effect(player, card, source="event")
+        """
+        Pour un événement, on crée un effet en attente de sélection si c'est le joueur courant.
+        Pour les autres, on applique aléatoirement.
+        """
+        if player is self.current_player:
+            # V3: Laisser le joueur choisir quelle carte désactiver
+            active_positions = [
+                pos for pos, cel in player.network.grille.items()
+                if cel.etat == EtatCellule.VIVANTE
+            ]
+            if active_positions:
+                self.pending_effect = {
+                    "card": card,
+                    "player": player,
+                    "effect_type": "deconnecter",
+                    "target": "self",
+                    "count": int(card.effets.get("count", "1")) if card.effets else 1,
+                    "available_positions": active_positions,
+                }
+                self.last_effect_card = card
+            else:
+                # Pas de cartes à désactiver
+                pass
+        else:
+            # Pour les autres joueurs, on applique aléatoirement
+            self._resolve_effect(player, card, source="event")
+
 
     def _resolve_effect(self, player: Player, card: Card, source: str = "bonus") -> None:
         effets = card.effets
@@ -255,6 +286,26 @@ class Game:
         chosen = random.sample(dead_positions, min(count, len(dead_positions)))
         for pos in chosen:
             player.network.reconnecter(pos)
+
+    def apply_pending_effect_selection(self, selected_positions: list[Position]) -> None:
+        """
+        Applique l'effet en attente avec les positions sélectionnées par le joueur.
+        """
+        if not self.pending_effect:
+            return
+        
+        effect_type = self.pending_effect["effect_type"]
+        player = self.pending_effect["player"]
+        count = self.pending_effect["count"]
+        
+        if effect_type == "deconnecter":
+            # Désactiver les cartes sélectionnées
+            for pos in selected_positions[:count]:
+                if pos in player.network.grille:
+                    player.network.deconnecter(pos)
+        
+        self.pending_effect = None
+        self.last_message = f"Effet appliqué : {self.last_effect_card.nom if self.last_effect_card else 'N/A'}"
 
     def check_victory(self) -> Optional[Player]:
         for player in self.players:
