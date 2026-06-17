@@ -14,7 +14,7 @@ from .enums import CategorieCarte
 from src.utils.constants import (
     PLAYER_COLORS, ACTIONS_PER_TURN, EVENT_FREQUENCY,
     INFRASTRUCTURE_VICTORY_COUNT, INITIAL_HAND_SIZE,
-    ACTION_DRAW_INFRA, ACTION_DRAW_BONUS, ACTION_PLAY_CARD,
+    ACTION_DRAW_INFRA, ACTION_DRAW_BONUS, ACTION_PLAY_CARD, ACTION_DECONNECT,
 )
 
 import os
@@ -146,6 +146,16 @@ class Game:
             else:
                 msg = "Placement impossible"
 
+        elif action_type == ACTION_DECONNECT:
+            target_player_id = kwargs.get("target_player_id")
+            pos = kwargs.get("pos")
+            target_player = next((p for p in self.players if p.player_id == target_player_id), None)
+            if target_player and pos in target_player.network.grille:
+                target_player.network.deconnecter(pos)
+                success, msg = True, f"Carte de {target_player.name} déconnectée"
+            else:
+                msg = "Cible invalide"
+
         if success:
             player.actions_left -= 1
 
@@ -187,6 +197,9 @@ class Game:
                 self._repair_dead_cards(player, 1, card)
                 return
             if card.categorie == CategorieCarte.MALUS:
+                # Si c'est un malus immédiat (pioche bonus), on garde l'effet aléatoire
+                # car le joueur ne peut pas choisir sa cible au moment de la pioche
+                # sans compliquer l'UI.
                 self._deconnect_cards(player, target="random_opponent", count=1, card=card)
                 return
             if card.categorie == CategorieCarte.EVENEMENT:

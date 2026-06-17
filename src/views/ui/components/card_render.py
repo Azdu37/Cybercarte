@@ -192,7 +192,11 @@ def draw_tooltip(surf, card: Card, mx: int, my: int,
                  screen_w: int, screen_h: int) -> None:
     tip_font  = pygame.font.SysFont(None, 18)
     name_font = pygame.font.SysFont(None, 20)
-    desc = card.description or "Carte infrastructure"
+    
+    # On prend la première partie de la description (la définition) pour le tooltip
+    full_desc = card.description or "Carte infrastructure"
+    desc = full_desc.split("\n\n")[0]
+    
     lines = wrap_text(desc, tip_font, 210)
     tw, th = 240, 28 + len(lines) * 15
     tx = min(mx + 15, screen_w - tw - 5)

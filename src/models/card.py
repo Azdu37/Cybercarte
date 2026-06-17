@@ -54,4 +54,23 @@ def card_from_dict(data: dict) -> Card:
 def load_cards(chemin: str) -> dict[str, Card]:
     with open(chemin, encoding="utf-8") as f:
         data = json.load(f)
-    return {d["id"]: card_from_dict(d) for d in data}
+    cards = {d["id"]: card_from_dict(d) for d in data}
+    
+    # Enrichissement avec le dictionnaire
+    try:
+        from src.data.dictionary import DICTIONARY
+        for section in DICTIONARY:
+            for d_card in section["cartes"]:
+                # On cherche la carte par nom (ou id si on veut être plus précis, 
+                # mais le dico utilise 'nom')
+                for card in cards.values():
+                    if card.nom == d_card["nom"]:
+                        # On utilise la définition du dico si la description est vide
+                        if not card.description:
+                            # On combine définition et effet pour la description longue
+                            full_desc = d_card["definition"] + "\n\n" + d_card["effet"]
+                            object.__setattr__(card, 'description', full_desc)
+    except ImportError:
+        pass
+
+    return cards
