@@ -1,4 +1,4 @@
-"""Écran d'accueil dans le style visuel des camarades."""
+"""Écran d'accueil dans le style visuel."""
 from __future__ import annotations
 import pygame
 from src.views.ui.components.card_render import (
