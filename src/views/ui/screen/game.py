@@ -26,6 +26,10 @@ from src.views.ui.components.network_board import (
     draw_network, pixel_to_pos, network_pixel_size, _limites
 )
 from src.views.ui.components.log import Log
+from src.views.ui.components.event_modal import EventModal
+from src.views.ui.components.card_selector import CardSelector
+from src.views.ui.components.card_detail_view import CardDetailView
+
 
 Position = tuple[int, int]
 
@@ -68,6 +72,12 @@ class GameScreen:
         self._btn_fin   = pygame.Rect(mid_x, 140, 160, 34)
         self._btn_infra = pygame.Rect(mid_x, 184, 160, 34)
         self._btn_bonus = pygame.Rect(mid_x, 228, 160, 34)
+        
+        # V3: Modals et sélecteurs
+        self.event_modal: EventModal | None = None
+        self.card_selector: CardSelector | None = None
+        self.card_detail_view: CardDetailView | None = None
+
 
     # ── Scroll ───────────────────────────────────────────────────────
     def _scroll_hand(self, delta: int, hand_size: int) -> None:
@@ -79,6 +89,11 @@ class GameScreen:
     def _reset_scroll_for_player(self, hand_size: int) -> None:
         """Remet le scroll à 0 (appelé au changement de joueur)."""
         self._hand_scroll = 0
+    
+    def handle_scroll(self, delta: int, game: Game) -> None:
+        """Gère la molette de souris pour le scroll de la main."""
+        cp = game.current_player
+        self._scroll_hand(-delta, len(cp.hand))
 
     # ── Positions valides ────────────────────────────────────────────
     def _update_surlignees(self, game: Game) -> None:
@@ -182,11 +197,60 @@ class GameScreen:
         # Tooltip
         if self.hover_card:
             draw_tooltip(surf, self.hover_card, mx, my, self.sw, self.sh)
+        
+        # V3: Affichage des modals
+        if self.event_modal:
+            self.event_modal.draw(surf, self.sw, self.sh)
+        
+        # V3: Créer le sélecteur si un effet est en attente
+        if game.pending_effect and not self.card_selector:
+            effect = game.pending_effect
+            if effect["effect_type"] == "deconnecter":
+                msg = f"Sélectionnez {effect['count']} carte(s) à désactiver"
+                self.card_selector = CardSelector(
+                    msg,
+                    effect["count"],
+                    effect["available_positions"],
+                    effect["player"].network.grille,
+                )
+        
+        if self.card_selector:
+            self.card_selector.draw(surf, self.sw, self.sh,
+                                   self._active_net_origin[0], self._active_net_origin[1])
+        
+        # V3: Afficher les détails d'une carte
+        if self.card_detail_view:
+            self.card_detail_view.draw(surf, self.sw, self.sh)
+
 
     # ── Clics ────────────────────────────────────────────────────────
     def handle_click(self, pos: tuple[int, int], game: Game) -> bool:
         mx, my = pos
         cp = game.current_player
+        
+        # V3: Gestion des detéails de cartes en priorité
+        if self.card_detail_view and self.card_detail_view.visible:
+            if self.card_detail_view.handle_click(pos):
+                self.card_detail_view = None
+            return False
+        
+        # V3: Gestion des modals en priorité
+        if self.event_modal and self.event_modal.visible:
+            if self.event_modal.handle_click(pos):
+                return False
+        
+        if self.card_selector and self.card_selector.visible:
+            result = self.card_selector.handle_click(pos)
+            if result is True:
+                # Sélection complète
+                selected = self.card_selector.selected
+                game.apply_pending_effect_selection(selected)
+                self.log.add(f"Cartes désactivées : {len(selected)}")
+                self.card_selector = None
+            elif result is False:
+                # Clic sur une carte
+                pass
+            return False
 
         # Fin de tour
         if self._btn_fin.collidepoint(mx, my):
@@ -207,6 +271,23 @@ class GameScreen:
         if self._btn_bonus.collidepoint(mx, my):
             ok, msg = game.perform_action(ACTION_DRAW_BONUS)
             self.log.add(msg)
+            
+            # V3: Afficher un modal explicatif
+            if ok and game.last_effect_card:
+                card = game.last_effect_card
+                # Construire la liste des impacts
+                players_affected = {}
+                if card.categorie.value == "malus":
+                    # Malus : affecte un adversaire
+                    opponents = [p for p in game.players if p is not cp]
+                    for opp in opponents:
+                        players_affected[opp.name] = [f"Perte possible d'une carte active"]
+                elif card.categorie.value == "bonus":
+                    # Bonus : affecte le joueur courant
+                    players_affected[cp.name] = [f"Réparation possible"]
+                
+                self.event_modal = EventModal(card, players_affected)
+            
             return False
 
         # Flèche gauche
@@ -223,6 +304,8 @@ class GameScreen:
         for i, r in self._hand_rects:
             if r.collidepoint(mx, my):
                 if i == self.selected_hand:
+                    # Double clic affiche les détails
+                    self.card_detail_view = CardDetailView(cp.hand[i])
                     self.selected_hand = None
                 else:
                     self.selected_hand = i
@@ -236,8 +319,8 @@ class GameScreen:
             self._active_net_origin[0], self._active_net_origin[1],
             self._active_net_xmin, self._active_net_ymin,
         )
-        if net_pos is not None and self.selected_hand is not None:
-            if net_pos in self._surlignees:
+        if net_pos is not None:
+            if self.selected_hand is not None and net_pos in self._surlignees:
                 ok, msg = game.perform_action(
                     ACTION_PLAY_CARD,
                     card_index=self.selected_hand,
@@ -248,6 +331,11 @@ class GameScreen:
                 self._surlignees   = ()
                 if ok and game.check_victory():
                     return True
+                return False
+            elif self.selected_hand is None and net_pos in cp.network.grille:
+                # V3: Afficher les détails de la carte du réseau
+                cel = cp.network.grille[net_pos]
+                self.card_detail_view = CardDetailView(cel.carte)
                 return False
 
         # Désélection
