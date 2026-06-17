@@ -41,6 +41,9 @@ class GameController:
             self.clock.tick(60)
 
     def _handle_key(self, key: int) -> None:
+        if self.state == "game" and self.game_screen:
+            self.game_screen.handle_key(key)
+
         if key == pygame.K_ESCAPE:
             if self.state == "dico":
                 self.state = self.prev_state
