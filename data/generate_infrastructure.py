@@ -135,12 +135,17 @@ def tourner(pattern: dict[Direction, Connecteur]) -> dict[Direction, Connecteur]
 def generer() -> list[dict]:
     cartes: list[dict] = []
     for type_id, motif0 in BASE_PATTERNS.items():
+        description, protege_de = "", ()
+        if type_id in PROTECTIONS:
+            description, protege_de = PROTECTIONS[type_id]
+
+        # Les cartes PROTECTION ont une orientation fixe sur le jeu physique :
+        # leurs 4 exemplaires sont identiques, pas des rotations.
+        # Les cartes INFRASTRUCTURE ont 4 variantes = 4 rotations a 90 degres.
+        est_protection = CATEGORIES[type_id] == "protection"
+
         motif = motif0
         for variante in range(4):
-            description, protege_de = "", ()
-            if type_id in PROTECTIONS:
-                description, protege_de = PROTECTIONS[type_id]
-
             cartes.append(
                 {
                     "id": f"{type_id}_{variante}",
@@ -153,7 +158,8 @@ def generer() -> list[dict]:
                     "protege_de": list(protege_de),
                 }
             )
-            motif = tourner(motif)
+            if not est_protection:
+                motif = tourner(motif)
     return cartes
 
 
