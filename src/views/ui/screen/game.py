@@ -98,7 +98,8 @@ class GameScreen:
 
         # État UI
         self.selected_hand: int | None = None
-        self.just_drawn: int | None = None 
+        self.just_drawn: int | None = None       # index carte surlignée
+        self.just_drawn_time: int = 0             # timestamp ms de la pioche
         self.selected_pos:  Position | None = None
         self.hover_card = None
         self.detail_card: Card | None = None
@@ -171,6 +172,11 @@ class GameScreen:
         self._hand_scroll = hand_bar.clamp_offset(
             self._hand_scroll, len(cp.hand), self.sw
         )
+
+        # Éteindre le halo après 3 secondes
+        if self.just_drawn is not None:
+            if pygame.time.get_ticks() - self.just_drawn_time > 3000:
+                self.just_drawn = None
 
         hud.draw(surf, game, self.sw)
 
@@ -423,11 +429,17 @@ class GameScreen:
             return False
 
         if self._btn_fin.collidepoint(mx, my):
+            self.just_drawn = None
             game.next_turn()
             self.selected_hand = None
             self._surlignees   = ()
             self._reset_scroll_for_player(len(game.current_player.hand))
             self.log.add(f"► Tour de {game.current_player.name}")
+            # Pioche automatique de début de tour : surligner la carte reçue
+            cp_new = game.current_player
+            if cp_new.hand:
+                self.just_drawn = len(cp_new.hand) - 1
+                self.just_drawn_time = pygame.time.get_ticks()
             self.overlay_active = True
             return False
 
@@ -436,6 +448,7 @@ class GameScreen:
             self.log.add(msg)
             if ok:
                 self.just_drawn = len(game.current_player.hand) - 1
+                self.just_drawn_time = pygame.time.get_ticks()
             return False
 
         if self._btn_bonus.collidepoint(mx, my):
@@ -443,6 +456,7 @@ class GameScreen:
             self.log.add(msg)
             if ok:
                 self.just_drawn = len(game.current_player.hand) - 1
+                self.just_drawn_time = pygame.time.get_ticks()
             return False
 
         if self._btn_left and self._btn_left.collidepoint(mx, my):

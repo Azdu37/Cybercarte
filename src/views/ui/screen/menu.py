@@ -29,7 +29,7 @@ def draw(surf: pygame.Surface, nb_sel: int, screen_w: int, screen_h: int) -> Non
     mx, my = pygame.mouse.get_pos()
 
     tf = pygame.font.SysFont(None, 64)
-    surf.blit(tf.render("CyberCarte", True, C_HIGHLIGHT),
+    surf.blit(tf.render("Network Codex", True, C_HIGHLIGHT),
               tf.render("CyberCarte", True, C_HIGHLIGHT).get_rect(center=(screen_w // 2, 160)))
 
     sf = pygame.font.SysFont(None, 24)

@@ -44,6 +44,7 @@ def draw(
     screen_h: int,
     selected: int | None = None,
     scroll_offset: int = 0,
+    just_drawn: int | None = None,
 ) -> tuple[list[tuple[int, pygame.Rect]], pygame.Rect | None, pygame.Rect | None]:
     """
     Dessine la barre de main avec scroll.
@@ -116,7 +117,7 @@ def draw(
         real_idx = scroll_offset + j
         cx = start_x + j * (CARD_W + CARD_GAP)
         cy = bar_y + 6
-        r  = draw_card(surf, card, cx, cy, selected=(real_idx == selected))
+        r  = draw_card(surf, card, cx, cy, selected=(real_idx == selected), just_drawn=(real_idx == just_drawn))
         rects.append((real_idx, r))
 
     surf.set_clip(old_clip)

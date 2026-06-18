@@ -149,7 +149,8 @@ def _draw_fallback(card_surf: pygame.Surface, card: Card, w: int, h: int,
 def draw_card(surf, card: Card, x: int, y: int, *,
               selected: bool = False,
               morte: bool = False,
-              small: bool = False) -> pygame.Rect:
+              small: bool = False,
+              just_drawn: bool = False) -> pygame.Rect:
     """
     Dessine une carte à (x, y). Renvoie le Rect (détection de clics).
       selected : bordure dorée
@@ -175,8 +176,17 @@ def draw_card(surf, card: Card, x: int, y: int, *,
     # ── Bordure (sélection ou normale) ───────────────────────────────
     if selected:
         pygame.draw.rect(card_surf, C_HIGHLIGHT, (0, 0, w, h), width=3, border_radius=8)
+    elif just_drawn:
+        pygame.draw.rect(card_surf, (80, 220, 130), (0, 0, w, h), width=2, border_radius=8)
     else:
         pygame.draw.rect(card_surf, (0, 0, 0, 160), (0, 0, w, h), width=1, border_radius=8)
+
+    if just_drawn:
+        pulse = abs(pygame.time.get_ticks() % 1000 - 500) / 500
+        alpha = int(80 + 140 * pulse)
+        halo = pygame.Surface((w + 10, h + 10), pygame.SRCALPHA)
+        pygame.draw.rect(halo, (80, 220, 130, alpha), (0, 0, w + 10, h + 10), border_radius=11)
+        surf.blit(halo, (x - 5, y - 5))
 
     surf.blit(card_surf, (x, y))
 

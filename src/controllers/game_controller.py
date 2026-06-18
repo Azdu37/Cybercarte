@@ -5,6 +5,7 @@ from src.models.game import Game
 from src.utils.constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from src.views.ui.screen import menu, game, end
 from src.views.ui.screen.dictionary_screen import DictionaryScreen
+from src.views.ui.screen.naming_screen import NamingScreen
 
 
 class GameController:
@@ -14,9 +15,10 @@ class GameController:
         pygame.display.set_caption("Network Codex")
         self.clock  = pygame.time.Clock()
 
-        self.state      = "menu"   # menu | game | end | dico
+        self.state      = "menu"   # menu | naming | game | end | dico
         self.prev_state = "menu"   # état d'où on vient (pour le retour du dico)
         self.nb_joueurs = 2
+        self.naming = NamingScreen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.game_model:  Game | None = None
         self.game_screen: game.GameScreen | None = None
@@ -29,7 +31,10 @@ class GameController:
                 if event.type == pygame.QUIT:
                     pygame.quit(); sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    self._handle_key(event.key)
+                    if self.state == "naming":
+                        self.naming.handle_key(event)
+                    else:
+                        self._handle_key(event.key)
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self._handle_click(event.pos)
                 if event.type == pygame.MOUSEWHEEL:
@@ -43,6 +48,7 @@ class GameController:
     def _handle_key(self, key: int) -> None:
         if self.state == "game" and self.game_screen:
             self.game_screen.handle_key(key)
+        # Note : les events clavier du naming sont gérés via KEYDOWN dans run()
 
         if key == pygame.K_ESCAPE:
             if self.state == "dico":
@@ -96,16 +102,22 @@ class GameController:
                 pos, self.nb_joueurs, SCREEN_WIDTH
             )
             if commencer:
-                self.game_model  = Game()
+                self.naming.setup(self.nb_joueurs)
+                self.state = "naming"
+            elif ouvrir_dico:
+                self._open_dico()
+
+        elif self.state == "naming":
+            if self.naming.handle_click(pos):
+                # Lancer la partie avec les noms saisis
+                noms = self.naming.get_names()
+                self.game_model = Game()
                 self.game_model.setup(self.nb_joueurs)
+                for i, player in enumerate(self.game_model.players):
+                    player.name = noms[i]
                 self.game_screen = game.GameScreen(SCREEN_WIDTH, SCREEN_HEIGHT)
                 self.state = "game"
                 self.game_screen.log.add(f"► Tour de {self.game_model.current_player.name}")
-                for player in self.game_model.players:
-                    if player.objectif:
-                        self.game_screen.log.add(f"Objectif {player.name} : {player.objectif.nom}")
-            elif ouvrir_dico:
-                self._open_dico()
 
         elif self.state == "game" and self.game_model and self.game_screen:
             result = self.game_screen.handle_click(pos, self.game_model)
@@ -137,6 +149,8 @@ class GameController:
     def _draw(self) -> None:
         if self.state == "menu":
             menu.draw(self.screen, self.nb_joueurs, SCREEN_WIDTH, SCREEN_HEIGHT)
+        elif self.state == "naming":
+            self.naming.draw(self.screen)
         elif self.state == "game" and self.game_model and self.game_screen:
             self.game_screen.draw(self.screen, self.game_model)
         elif self.state == "end" and self.game_model and self.winner:
