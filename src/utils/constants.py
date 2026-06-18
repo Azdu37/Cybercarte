@@ -70,5 +70,5 @@ EVENT_FREQUENCY     = 2   # Tous les 2 tours complets (un tour = tous les joueur
 ACTION_DRAW_INFRA  = "draw_infra"
 ACTION_DRAW_BONUS  = "draw_bonus"
 ACTION_PLAY_CARD   = "play_card"
-ACTION_DECONNECT   = "deconnect"
 ACTION_END_TURN    = "end_turn"
+ACTION_DECONNECT   = "deconnect"

@@ -52,6 +52,39 @@ class GameController:
         if self.state == "dico":
             self.dico.handle_key(key)
 
+    def _capitulate(self, game: Game) -> None:
+        """
+        Élimine le joueur courant :
+        - Si 2 joueurs : le restant gagne immédiatement.
+        - Sinon : le joueur est retiré, la partie continue avec les autres.
+        """
+        idx    = game.current_player_index
+        loser  = game.players[idx]
+        loser.calculate_score()
+
+        game.players.pop(idx)
+
+        if len(game.players) == 1:
+            # Dernier joueur debout : victoire immédiate
+            winner = game.players[0]
+            winner.calculate_score()
+            self.winner = winner
+            self.game_model = game
+            self.state = "end"
+            return
+
+        # Corriger l'index courant après suppression
+        game.current_player_index = idx % len(game.players)
+        # Remettre les actions à jour pour le nouveau joueur courant
+        game.current_player.reset_actions()
+
+        if self.game_screen:
+            self.game_screen.log.add(f"► {loser.name} a abandonné la partie !")
+            self.game_screen.log.add(f"► Tour de {game.current_player.name}")
+            self.game_screen.selected_hand = None
+            self.game_screen._surlignees   = ()
+            self.game_screen.overlay_active = True
+
     def _open_dico(self) -> None:
         self.prev_state = self.state
         self.dico.reset()
@@ -78,6 +111,8 @@ class GameController:
             result = self.game_screen.handle_click(pos, self.game_model)
             if result == "open_dico":
                 self._open_dico()
+            elif result == "capitulation":
+                self._capitulate(self.game_model)
             elif result is True:
                 for p in self.game_model.players:
                     p.calculate_score()
