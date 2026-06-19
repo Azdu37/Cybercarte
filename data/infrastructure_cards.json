@@ -6,7 +6,7 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "electrique",
-      "E": "donnees",
+      "E": "rj45",
       "S": "electrique",
       "O": "electrique"
     },
@@ -24,7 +24,7 @@
     "connecteurs": {
       "N": "electrique",
       "E": "electrique",
-      "S": "donnees",
+      "S": "rj45",
       "O": "electrique"
     },
     "description": "",
@@ -42,7 +42,7 @@
       "N": "electrique",
       "E": "electrique",
       "S": "electrique",
-      "O": "donnees"
+      "O": "rj45"
     },
     "description": "",
     "tags": [
@@ -56,7 +56,7 @@
     "nom": "PC",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
+      "N": "rj45",
       "E": "electrique",
       "S": "electrique",
       "O": "electrique"
@@ -142,9 +142,9 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "electrique",
-      "E": "donnees",
-      "S": "donnees",
-      "O": "donnees"
+      "E": "rj45",
+      "S": "rj45",
+      "O": "rj45"
     },
     "description": "",
     "tags": [
@@ -158,10 +158,10 @@
     "nom": "Serveur",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
+      "N": "rj45",
       "E": "electrique",
-      "S": "donnees",
-      "O": "donnees"
+      "S": "rj45",
+      "O": "rj45"
     },
     "description": "",
     "tags": [
@@ -175,10 +175,10 @@
     "nom": "Serveur",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
-      "E": "donnees",
+      "N": "rj45",
+      "E": "rj45",
       "S": "electrique",
-      "O": "donnees"
+      "O": "rj45"
     },
     "description": "",
     "tags": [
@@ -192,9 +192,9 @@
     "nom": "Serveur",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
-      "E": "donnees",
-      "S": "donnees",
+      "N": "rj45",
+      "E": "rj45",
+      "S": "rj45",
       "O": "electrique"
     },
     "description": "",
@@ -212,7 +212,7 @@
       "N": "electrique",
       "E": "electrique",
       "S": "electrique",
-      "O": "donnees"
+      "O": "rj45"
     },
     "description": "",
     "tags": [
@@ -226,7 +226,7 @@
     "nom": "Routeur",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
+      "N": "rj45",
       "E": "electrique",
       "S": "electrique",
       "O": "electrique"
@@ -244,7 +244,7 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "electrique",
-      "E": "donnees",
+      "E": "rj45",
       "S": "electrique",
       "O": "electrique"
     },
@@ -262,7 +262,7 @@
     "connecteurs": {
       "N": "electrique",
       "E": "electrique",
-      "S": "donnees",
+      "S": "rj45",
       "O": "electrique"
     },
     "description": "",
@@ -549,7 +549,7 @@
     "nom": "Point Réseau",
     "categorie": "infrastructure",
     "connecteurs": {
-      "N": "donnees",
+      "N": "rj45",
       "E": "electrique",
       "S": "electrique",
       "O": "electrique"
@@ -567,7 +567,7 @@
     "categorie": "infrastructure",
     "connecteurs": {
       "N": "electrique",
-      "E": "donnees",
+      "E": "rj45",
       "S": "electrique",
       "O": "electrique"
     },
@@ -585,7 +585,7 @@
     "connecteurs": {
       "N": "electrique",
       "E": "electrique",
-      "S": "donnees",
+      "S": "rj45",
       "O": "electrique"
     },
     "description": "",
@@ -603,7 +603,7 @@
       "N": "electrique",
       "E": "electrique",
       "S": "electrique",
-      "O": "donnees"
+      "O": "rj45"
     },
     "description": "",
     "tags": [

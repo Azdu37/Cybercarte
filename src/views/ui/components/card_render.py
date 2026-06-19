@@ -35,6 +35,7 @@ C_DISCONNECT = ( 90,  90, 100)
 
 C_DONNEES = ( 60, 120, 230)   # carré bleu
 C_ELEC    = (235, 175,  60)   # rond orange
+C_RJ45    = (180,  50, 255)   # losange violet
 
 CARD_W, CARD_H = 90, 126
 SLOT_PAD       = 10
@@ -111,9 +112,17 @@ def _draw_connectors(surf, card: Card, x: int, y: int, w: int, h: int,
             rect = pygame.Rect(px - r, py - r, sq, sq)
             pygame.draw.rect(surf, C_DONNEES, rect, border_radius=2)
             pygame.draw.rect(surf, (0, 0, 0), rect, width=1, border_radius=2)
-        else:  # ELECTRIQUE
+        elif conn is Connecteur.ELECTRIQUE:
             pygame.draw.circle(surf, C_ELEC, (px, py), r)
             pygame.draw.circle(surf, (0, 0, 0), (px, py), r, 1)
+        elif conn is Connecteur.RJ45:
+            # On dessine un losange pour RJ45
+            points = [
+                (px, py - r), (px + r, py),
+                (px, py + r), (px - r, py)
+            ]
+            pygame.draw.polygon(surf, C_RJ45, points)
+            pygame.draw.polygon(surf, (0, 0, 0), points, width=1)
 
 
 # ── Surcouche "déconnectée" ───────────────────────────────────────────

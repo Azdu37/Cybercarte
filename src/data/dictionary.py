@@ -12,7 +12,7 @@ DICTIONARY = [
             {
                 "nom": "PC",
                 "definition": "Ordinateur personnel. Élément de base de tout réseau.",
-                "effet": "Carte infrastructure standard. Se connecte via des ports Données et Électrique.",
+                "effet": "Carte infrastructure standard. Se connecte via des ports RJ45 et Électrique.",
             },
             {
                 "nom": "Smartphone",
@@ -22,12 +22,12 @@ DICTIONARY = [
             {
                 "nom": "Serveur",
                 "definition": "Machine centrale qui héberge les services et données de l'infrastructure.",
-                "effet": "Carte infrastructure. Connecteurs mixtes Données et Électrique.",
+                "effet": "Carte infrastructure. Connecteurs mixtes Données, RJ45 et Électrique.",
             },
             {
                 "nom": "Routeur",
                 "definition": "Équipement réseau qui dirige le trafic entre les différents segments.",
-                "effet": "Carte infrastructure. Trois connecteurs Électrique, un Données.",
+                "effet": "Carte infrastructure. Connecteurs Électrique, Données et RJ45.",
             },
             {
                 "nom": "Boîte Mail",
@@ -52,7 +52,7 @@ DICTIONARY = [
             {
                 "nom": "Point Réseau",
                 "definition": "Prise ou borne d'accès physique au réseau local.",
-                "effet": "Carte infrastructure. Connecteurs Données (N/O) et Électrique (E/S).",
+                "effet": "Carte infrastructure. Connecteurs RJ45 et Électrique.",
             },
             {
                 "nom": "Cloud",

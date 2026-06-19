@@ -7,6 +7,7 @@ class Connecteur(Enum):
     VIDE      = "vide"
     DONNEES   = "donnees"
     ELECTRIQUE = "electrique"
+    RJ45      = "rj45"
 
     def correspond_a(self, autre: "Connecteur") -> bool:
         return self is not Connecteur.VIDE and self is autre

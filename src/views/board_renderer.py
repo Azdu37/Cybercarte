@@ -25,8 +25,16 @@ def dessiner_connecteurs_carte(surface: pygame.Surface, rect: pygame.Rect, carte
             sq = pygame.Rect(0, 0, taille, taille)
             sq.center = (px, py)
             pygame.draw.rect(surface, c.COULEUR_DONNEES, sq, border_radius=3)
-        else:
+        elif conn is Connecteur.ELECTRIQUE:
             pygame.draw.circle(surface, c.COULEUR_ELECTRIQUE, (px, py), taille // 2)
+        elif conn is Connecteur.RJ45:
+            r = taille // 2
+            points = [
+                (px, py - r), (px + r, py),
+                (px, py + r), (px - r, py)
+            ]
+            pygame.draw.polygon(surface, c.COULEUR_RJ45, points)
+            pygame.draw.polygon(surface, (0, 0, 0), points, width=1)
 
 
 def dessiner_carte(surface: pygame.Surface, rect: pygame.Rect, carte: Card, police, *,

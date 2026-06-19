@@ -1,0 +1,47 @@
+Architecture du Projet - Network Codex (Cybercarte)
+
+/ (Racine)
+- main.py : Point d'entrée de l'application, initialise et lance le GameController.
+- README.md : Documentation générale du projet.
+- archi.txt : (Ce fichier) Description de l'architecture et du rôle de chaque fichier.
+- Network Codex.txt : Document de texte probablement lié au design ou aux notes du jeu.
+- test_network.py : Script de test pour valider la logique du réseau.
+
+/src : Code source principal de l'application.
+- src/__init__.py : Initialisation du package src.
+
+/src/controllers : Contrôleurs de la logique de flux.
+- src/controllers/game_controller.py : Gère la boucle principale du jeu, les événements et les transitions d'écrans.
+
+/src/data : Données statiques du jeu.
+- src/data/dictionary.py : Dictionnaire des cartes contenant définitions, effets et descriptions textuelles.
+
+/src/models : Modèles de données (Logique métier/Moteur).
+- src/models/card.py : Définition des classes de cartes et chargement des données JSON.
+- src/models/enums.py : Énumérations partagées (catégories, connecteurs, directions).
+- src/models/game.py : Logique centrale du jeu (gestion des tours, actions, conditions de victoire).
+- src/models/network.py : Représentation du réseau (grille) d'un joueur et règles de placement.
+- src/models/player.py : Classe représentant un joueur (main, réseau, score).
+
+/src/utils : Outils et constantes utilitaires.
+- src/utils/constants.py : Constantes globales (couleurs, dimensions, règles du jeu).
+- src/utils/widgets.py : Composants d'interface simples et réutilisables (boutons).
+- src/utils/card_assets.py : (Optionnel) Gestion des chemins vers les assets des cartes.
+
+/src/views : Gestion de l'affichage (Pygame).
+- src/views/game_view.py : Vue principale gérant le rendu global de l'interface de jeu.
+- src/views/menu_view.py : Gestion de l'affichage et des interactions du menu principal.
+- src/views/board_renderer.py : Fonctions spécialisées pour le rendu du plateau/réseau.
+- src/views/assets_loader.py : Chargement centralisé des ressources (images, sons).
+
+/src/views/ui : Composants d'interface utilisateur avancés.
+- src/views/ui/components/ : Éléments UI réutilisables (rendu de carte, barre de main, HUD, logs).
+- src/views/ui/screen/ : Écrans complets (jeu, menu, dictionnaire, fin de partie).
+
+/assets : Ressources multimédias.
+- /assets/cards/ : Images des cartes de jeu.
+- /assets/images/ : Images d'interface (fonds, icônes).
+- /assets/sounds/ : Effets sonores et musiques.
+
+/data : Fichiers de données (JSON).
+- /data/cards.json : (Si présent) Base de données des cartes au format JSON.
